@@ -1,0 +1,40 @@
+# Compilados y binarios
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*_test
+test_openmp
+test_openmp_cpp
+ising
+ising.exe
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Output
+*.out
+*.log
+
+# CMake
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+*.cmake
+
