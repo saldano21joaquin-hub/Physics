@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Principio Variacional desde cero</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="initPresentation()"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:#fff;
+  overflow:hidden;
+  font-family:'KaTeX_Main','Computer Modern',Georgia,'Times New Roman',serif;
+  color:#2c2c2c;
+}
+
+/* fondo levemente crema visible en los bordes del marco */
+.presentation::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#f7f3ec 0%,#faf8f5 50%,#f5f0e8 100%);
+  z-index:-1;
+}
+
+.presentation{
+  width:100vw;height:100vh;
+  position:relative;overflow:hidden;
+}
+
+.slides-container{width:100%;height:100%;position:relative;}
+
+/* ── Slide base ── */
+.slide{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:3.2rem 7rem;
+  background:#fff;
+  transition:transform 0.8s cubic-bezier(0.26,0.86,0.44,0.985);
+}
+.slide.past  {transform:translateX(-100%);}
+.slide.present{transform:translateX(0);}
+.slide.future{transform:translateX(100%);}
+
+/* Marco elegante interior */
+.slide::after{
+  content:'';
+  position:absolute;
+  inset:22px;
+  border:1px solid rgba(180,155,115,0.18);
+  pointer-events:none;
+  z-index:50;
+}
+/* Línea de acento superior */
+.slide::before{
+  content:'';
+  position:absolute;
+  top:22px;left:22px;right:22px;
+  height:2px;
+  background:linear-gradient(90deg,transparent 0%,rgba(180,155,115,0.35) 30%,rgba(180,155,115,0.35) 70%,transparent 100%);
+  pointer-events:none;
+  z-index:51;
+}
+
+/* ── Fragmentos ── */
+.fragment{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .45s ease,transform .45s ease;
+  will-change:opacity,transform;
+}
+.fragment.visible{opacity:1;transform:translateY(0);}
+
+/* ══════════════════════════════════════════
+   PORTADA
+══════════════════════════════════════════ */
+.slide-portada{text-align:center;}
+.slide-portada .titulo{
+  font-size:3.4rem;color:#2c2c2c;line-height:1.22;
+  margin-bottom:1.5rem;max-width:860px;
+}
+.slide-portada .sep{
+  width:60px;height:2px;background:#d8cfc2;margin:0 auto 1.5rem;
+}
+.slide-portada .subtitulo{
+  font-size:1.55rem;color:#888;font-style:italic;
+  line-height:1.65;max-width:740px;
+}
+
+/* ══════════════════════════════════════════
+   PREGUNTA + TEORÍA
+══════════════════════════════════════════ */
+.slide-teoria .inner{width:100%;max-width:920px;}
+
+.pregunta-box{
+  background:#f5f1e8;
+  border-left:4px solid #2c2c2c;
+  padding:1rem 1.6rem;
+  margin-bottom:1.8rem;
+  border-radius:0 6px 6px 0;
+}
+.pregunta-box p{
+  font-size:1.58rem;font-weight:600;line-height:1.4;color:#2c2c2c;
+}
+
+.teoria-list{list-style:none;width:100%;}
+.teoria-list li{
+  font-size:1.36rem;color:#2c2c2c;
+  margin-bottom:.65rem;
+  padding-left:1.8rem;
+  position:relative;line-height:1.75;
+}
+.teoria-list li::before{content:'—';position:absolute;left:0;color:#bbb;}
+
+/* bullet que es solo ecuación: sin guión, centrado */
+.teoria-list li.eq-only{padding-left:0;text-align:center;}
+.teoria-list li.eq-only::before{content:'';}
+
+/* slides con mucho contenido */
+.slide-compact .teoria-list li{font-size:1.18rem;margin-bottom:.46rem;}
+
+/* ══════════════════════════════════════════
+   CÁLCULOS DOS COLUMNAS
+══════════════════════════════════════════ */
+.slide-calculo .inner{
+  width:100%;height:88%;
+  display:flex;align-items:flex-start;gap:0;
+}
+.col{
+  flex:1;display:flex;flex-direction:column;
+  gap:.9rem;padding-top:.5rem;align-items:center;
+}
+.col .line{
+  font-size:1.3rem;text-align:center;
+  line-height:2.0;color:#1a1a1a;width:100%;
+}
+.col-divider{
+  width:1px;background:#e0e0e0;
+  align-self:stretch;margin:0 2rem;flex-shrink:0;
+}
+
+/* ══════════════════════════════════════════
+   CONCLUSIÓN
+══════════════════════════════════════════ */
+.slide-conclusion{text-align:center;}
+.slide-conclusion .inner{
+  max-width:940px;
+  display:flex;flex-direction:column;
+  align-items:center;gap:1.2rem;
+}
+.slide-conclusion p{
+  font-size:1.4rem;color:#2c2c2c;line-height:1.7;
+}
+.slide-conclusion .eq-big{font-size:1.5rem;}
+
+/* ══════════════════════════════════════════
+   CIERRE
+══════════════════════════════════════════ */
+.slide-cierre{text-align:center;}
+
+/* ══════════════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════════════ */
+.nav-overlay{
+  position:fixed;bottom:1.6rem;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 2.4rem;pointer-events:none;z-index:100;
+}
+.nav-overlay>*{pointer-events:all;}
+.slide-counter{font-family:monospace;font-size:1rem;color:#bbb;}
+.nav-btns{display:flex;gap:.4rem;}
+.nav-btn{
+  background:none;border:1px solid #e0e0e0;color:#2c2c2c;
+  padding:.32rem 1rem;cursor:pointer;border-radius:4px;
+  font-size:1.1rem;transition:background .2s;
+}
+.nav-btn:hover{background:#f5f1e8;}
+.progress-bar{
+  position:fixed;bottom:0;left:0;height:2px;
+  background:#2c2c2c;transition:width .4s ease;z-index:101;
+}
+</style>
+</head>
+<body>
+<div class="presentation">
+<div class="slides-container" id="sc">
+
+<!-- ═══════════════════ SLIDE 1 ═══════════════════ -->
+<div class="slide slide-portada present">
+  <h1 class="titulo">Principio variacional desde cero</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">¿Qué significa variar una curva y por qué de ahí sale una ecuación diferencial?</p>
+</div>
+
+<!-- ═══════════════════ SLIDE 2 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué cambia respecto de la mecánica newtoniana usual?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">En el enfoque usual uno piensa en la posición de una partícula en cada instante: $\vec{r}(t)$.</li>
+    <li class="fragment">Luego deriva y escribe una ecuación de movimiento como $m\ddot{\vec{r}}=\vec{F}$.</li>
+    <li class="fragment">En el enfoque variacional el objeto central no es un punto ni un instante, sino una trayectoria completa.</li>
+    <li class="fragment">La pregunta cambia a: entre todas las curvas posibles, ¿cuál es la privilegiada?</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 3 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">La idea central del bloque es esta:</li>
+    <li class="fragment eq-only">$$\boxed{\text{ya no comparamos valores de una función, sino curvas completas}}$$</li>
+    <li class="fragment">El principio variacional aparece cuando a cada curva le asociamos un número y buscamos la curva que hace ese número extremo.</li>
+    <li class="fragment">Más adelante ese número será la acción. Por ahora basta entender la estructura general.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 4 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué significa extremizar?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">En cálculo ordinario, si tenemos $f(a)$ y queremos buscar un valor especial de $a$, pedimos que el cambio de primer orden desaparezca.</li>
+    <li class="fragment">Por ejemplo, si $f(a)=a^2$ y cambiamos $a \to a+\varepsilon$, entonces</li>
+    <li class="fragment eq-only">$f(a+\varepsilon)=(a+\varepsilon)^2=a^2+2a\varepsilon+\varepsilon^2$</li>
+    <li class="fragment">El cambio es</li>
+    <li class="fragment eq-only">$f(a+\varepsilon)-f(a)=2a\varepsilon+\varepsilon^2$</li>
+    <li class="fragment">Si $\varepsilon$ es pequeño, el término dominante es el lineal $2a\varepsilon$.</li>
+    <li class="fragment">Para que $a$ sea un punto extremo, ese cambio lineal debe anularse.</li>
+    <li class="fragment">Eso da $2a=0$, luego $a=0$.</li>
+    <li class="fragment">Entonces extremizar significa anular la variación de primer orden.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 5 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="eq-big">$$\boxed{\text{extremizar = hacer cero el cambio lineal}}$$</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 6 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué cambia cuando en vez de un número tenemos una curva?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Ahora el objeto desconocido ya no es un número $a$, sino una función $y(x)$.</li>
+    <li class="fragment">Y a cada función $y(x)$ queremos asociarle un número.</li>
+    <li class="fragment">Ese número puede ser una longitud, un tiempo, un área, una energía integrada, etc.</li>
+    <li class="fragment">El objeto que toma una función y devuelve un número se llama <strong>funcional</strong>.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 7 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Una función ordinaria toma números y devuelve números:</li>
+    <li class="fragment eq-only">$a \mapsto f(a)$</li>
+    <li class="fragment">Una funcional toma funciones y devuelve números:</li>
+    <li class="fragment eq-only">$y(x)\mapsto I[y]$</li>
+    <li class="fragment">La forma típica que nos interesa es</li>
+    <li class="fragment eq-only">$$I[y]=\int_{x_1}^{x_2}\Phi\!\left(x,\,y(x),\,y'(x)\right)dx$$</li>
+    <li class="fragment">Aquí: $x$ es la variable independiente, $y(x)$ es la curva, $y'(x)=\dfrac{dy}{dx}$ es la pendiente, $\Phi$ es una expresión conocida, $I[y]$ es el número asociado a la curva.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 8 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Por qué la funcional depende de $y$ y de $y'$?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Porque muchos problemas geométricos y físicos dependen de la posición de la curva y también de su inclinación.</li>
+    <li class="fragment">La inclinación local de la curva está codificada en $y'$.</li>
+    <li class="fragment">Por eso la expresión más natural no es $\Phi(x,y)$, sino $\Phi(x,y,y')$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 9 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Cuál es el ejemplo más simple?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Encontrar la curva más corta entre dos puntos del plano.</li>
+    <li class="fragment">Si la curva se escribe como $y(x)$, el elemento de arco es</li>
+    <li class="fragment eq-only">$ds=\sqrt{dx^2+dy^2}$</li>
+    <li class="fragment">Factorizando $dx$:</li>
+    <li class="fragment eq-only">$$ds=\sqrt{1+\left(\frac{dy}{dx}\right)^{\!2}}\,dx=\sqrt{1+(y')^2}\,dx$$</li>
+    <li class="fragment">Entonces la longitud total queda</li>
+    <li class="fragment eq-only">$$I[y]=\int_{x_1}^{x_2}\sqrt{1+(y')^2}\,dx$$</li>
+    <li class="fragment">Aquí $\;\Phi(x,y,y')=\sqrt{1+(y')^2}$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 10 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="eq-big">$$\boxed{\text{la pregunta variacional es: ¿qué curva hace extrema la integral }I[y]?}$$</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 11 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Cómo se varía una curva?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Si en cálculo común hacíamos $a\to a+\varepsilon$, ahora debemos deformar la curva completa.</li>
+    <li class="fragment">Partimos de una curva candidata $y(x)$.</li>
+    <li class="fragment">Construimos una curva vecina</li>
+    <li class="fragment eq-only">$$Y(x)=y(x)+\varepsilon\,\eta(x)$$</li>
+    <li class="fragment">Aquí: $\varepsilon$ es pequeño, $\eta(x)$ describe la deformación, $Y(x)$ es una curva cercana a $y(x)$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 12 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Esta ecuación hay que leerla con cuidado:</li>
+    <li class="fragment eq-only">$$Y(x)=y(x)+\varepsilon\,\eta(x)$$</li>
+    <li class="fragment">$y(x)$ es la curva base.</li>
+    <li class="fragment">$\eta(x)$ no es la solución, sino una función arbitraria de deformación.</li>
+    <li class="fragment">$\varepsilon$ controla cuán fuerte es la deformación.</li>
+    <li class="fragment">Si $\varepsilon=0$, recuperamos la curva original.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 13 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Por qué la deformación debe anularse en los extremos?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Porque estamos comparando curvas que unen los mismos puntos.</li>
+    <li class="fragment">Si el problema fija los extremos, la curva deformada debe seguir pasando por esos mismos extremos.</li>
+    <li class="fragment">Entonces $Y(x_1)=y(x_1)$ y $Y(x_2)=y(x_2)$.</li>
+    <li class="fragment">Pero como $Y=y+\varepsilon\eta$, se obtiene</li>
+    <li class="fragment eq-only">$y(x_1)+\varepsilon\eta(x_1)=y(x_1)\;\Rightarrow\;\eta(x_1)=0$</li>
+    <li class="fragment eq-only">$y(x_2)+\varepsilon\eta(x_2)=y(x_2)\;\Rightarrow\;\eta(x_2)=0$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 14 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="eq-big">$$\boxed{\eta(x_1)=\eta(x_2)=0}$$</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 15 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Cómo cambia la derivada cuando deformamos la curva?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Si $\;Y(x)=y(x)+\varepsilon\eta(x)$,</li>
+    <li class="fragment">entonces derivando respecto de $x$:</li>
+    <li class="fragment eq-only">$$Y'(x)=y'(x)+\varepsilon\eta'(x)$$</li>
+    <li class="fragment">Esto será importante porque la funcional depende también de $y'$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 16 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué pasa al evaluar la funcional en la curva deformada?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Sustituimos $Y$ y $Y'$ en la funcional:</li>
+    <li class="fragment eq-only">$$I[Y]=\int_{x_1}^{x_2}\Phi(x,Y,Y')\,dx$$</li>
+    <li class="fragment">Como $Y=y+\varepsilon\eta$ y $Y'=y'+\varepsilon\eta'$, queda</li>
+    <li class="fragment eq-only">$$I[Y]=\int_{x_1}^{x_2}\Phi(x,\,y+\varepsilon\eta,\,y'+\varepsilon\eta')\,dx$$</li>
+    <li class="fragment">Ahora expandimos en Taylor respecto de $\varepsilon$ alrededor de $\varepsilon=0$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 17 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(x,\,y+\varepsilon\eta,\,y'+\varepsilon\eta')$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=\Phi(x,y,y')+\varepsilon\frac{\partial\Phi}{\partial y}\eta+\varepsilon\frac{\partial\Phi}{\partial y'}\eta'+O(\varepsilon^2)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$I[Y]=\int_{x_1}^{x_2}\Phi(x,y+\varepsilon\eta,y'+\varepsilon\eta')\,dx$$</div>
+    <div class="line fragment" data-fragment-index="3">$$I[Y]=\int_{x_1}^{x_2}\!\!\left[\Phi+\varepsilon\frac{\partial\Phi}{\partial y}\eta+\varepsilon\frac{\partial\Phi}{\partial y'}\eta'+O(\varepsilon^2)\right]dx$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 18 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$I[Y]=\int_{x_1}^{x_2}\Phi(x,y,y')\,dx$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\quad+\,\varepsilon\int_{x_1}^{x_2}\!\!\left(\frac{\partial\Phi}{\partial y}\eta+\frac{\partial\Phi}{\partial y'}\eta'\right)dx+O(\varepsilon^2)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$I[Y]=I[y]+\varepsilon\int_{x_1}^{x_2}\!\!\left(\frac{\partial\Phi}{\partial y}\eta+\frac{\partial\Phi}{\partial y'}\eta'\right)dx+O(\varepsilon^2)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 19 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué es la primera variación?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Es precisamente el término lineal en $\varepsilon$. Se define por</li>
+    <li class="fragment eq-only">$$\delta I=\int_{x_1}^{x_2}\!\!\left(\frac{\partial\Phi}{\partial y}\eta+\frac{\partial\Phi}{\partial y'}\eta'\right)dx$$</li>
+    <li class="fragment">Si la curva $y(x)$ hace estacionaria la funcional, entonces debe cumplirse</li>
+    <li class="fragment eq-only">$$\delta I=0$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 20 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="eq-big">$$\boxed{\delta I=\int_{x_1}^{x_2}\!\!\left(\frac{\partial\Phi}{\partial y}\eta+\frac{\partial\Phi}{\partial y'}\eta'\right)dx,\qquad \delta I=0}$$</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 21 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Por qué todavía no podemos concluir nada?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Porque la expresión de $\delta I$ todavía contiene $\eta'$.</li>
+    <li class="fragment">La variación que controlamos es $\eta$, no su derivada.</li>
+    <li class="fragment">Queremos reescribir toda la integral en función de $\eta$ sola.</li>
+    <li class="fragment">Para eso integramos por partes el término con $\eta'$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 22 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\delta I=\int_{x_1}^{x_2}\!\frac{\partial\Phi}{\partial y}\eta\,dx+\int_{x_1}^{x_2}\!\frac{\partial\Phi}{\partial y'}\eta'\,dx$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\text{Tomamos}\;\; u=\frac{\partial\Phi}{\partial y'},\quad dv=\eta'\,dx$$</div>
+    <div class="line fragment" data-fragment-index="2">$$du=\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)dx,\quad v=\eta$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="3">$$\int_{x_1}^{x_2}\!\frac{\partial\Phi}{\partial y'}\eta'\,dx=\left[\frac{\partial\Phi}{\partial y'}\eta\right]_{x_1}^{x_2}-\int_{x_1}^{x_2}\!\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\eta\,dx$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 23 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué pasa con el término de borde?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Como los extremos están fijos, ya vimos que $\eta(x_1)=\eta(x_2)=0$.</li>
+    <li class="fragment">Entonces</li>
+    <li class="fragment eq-only">$$\left[\frac{\partial\Phi}{\partial y'}\eta\right]_{x_1}^{x_2}=0$$</li>
+    <li class="fragment">Por tanto</li>
+    <li class="fragment eq-only">$$\int_{x_1}^{x_2}\!\frac{\partial\Phi}{\partial y'}\eta'\,dx=-\int_{x_1}^{x_2}\!\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\eta\,dx$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 24 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\delta I=\int_{x_1}^{x_2}\!\frac{\partial\Phi}{\partial y}\eta\,dx-\int_{x_1}^{x_2}\!\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\eta\,dx$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\delta I=\int_{x_1}^{x_2}\!\left[\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\right]\eta(x)\,dx$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 25 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Por qué de esa integral sale una ecuación diferencial puntual?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Porque $\eta(x)$ es arbitraria en el interior del intervalo.</li>
+    <li class="fragment">Solo exigimos que se anule en los extremos.</li>
+    <li class="fragment">Si el factor que multiplica a $\eta(x)$ no fuese cero en alguna región, podríamos escoger una variación concentrada allí y la integral no sería cero.</li>
+    <li class="fragment">Entonces la única posibilidad general es que el coeficiente de $\eta(x)$ se anule punto a punto.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 26 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">$$\int_{x_1}^{x_2}\!\left[\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\right]\eta(x)\,dx=0$$</p>
+  <p class="fragment">para toda $\eta(x)$ admisible implica</p>
+  <p class="fragment eq-big">$$\boxed{\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0}$$</p>
+  <p class="fragment">Esta es la <strong>ecuación de Euler-Lagrange</strong>.</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 27 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">El resultado principal del bloque es</li>
+    <li class="fragment eq-only" style="font-size:.88rem;">$$\boxed{\;\text{si }\; I[y]=\int_{x_1}^{x_2}\Phi(x,y,y')\,dx \;\text{ es estacionaria,}\;\text{ entonces }\;\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0\;}$$</li>
+    <li class="fragment">Es decir, una condición global sobre una curva produce una ecuación diferencial local.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 28 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué significa esto conceptualmente?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Partimos comparando curvas completas.</li>
+    <li class="fragment">Terminamos con una ecuación diferencial que debe satisfacer la curva buscada.</li>
+    <li class="fragment">Eso es lo profundo del cálculo variacional:</li>
+    <li class="fragment eq-only">$$\boxed{\text{problema global}\;\Longrightarrow\;\text{ecuación local}}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 29 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>Probemos la maquinaria: la recta más corta</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">Tomamos $\displaystyle I[y]=\int_{x_1}^{x_2}\sqrt{1+(y')^2}\,dx$</li>
+    <li class="fragment">Entonces $\;\Phi(x,y,y')=\sqrt{1+(y')^2}$</li>
+    <li class="fragment">Ahora aplicamos Euler-Lagrange.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 30 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi=\sqrt{1+(y')^2}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial y}=0$$</div>
+    <div class="line fragment" data-fragment-index="2">$$\frac{\partial\Phi}{\partial y'}=\frac{1}{2}\bigl(1+(y')^2\bigr)^{-1/2}\cdot 2y'$$</div>
+    <div class="line fragment" data-fragment-index="3">$$\frac{\partial\Phi}{\partial y'}=\frac{y'}{\sqrt{1+(y')^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="4">$$\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0$$</div>
+    <div class="line fragment" data-fragment-index="5">$$0-\frac{d}{dx}\!\left(\frac{y'}{\sqrt{1+(y')^2}}\right)=0$$</div>
+    <div class="line fragment" data-fragment-index="6">$$\frac{d}{dx}\!\left(\frac{y'}{\sqrt{1+(y')^2}}\right)=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 31 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{y'}{\sqrt{1+(y')^2}}=C$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\left(\frac{y'}{\sqrt{1+(y')^2}}\right)^{\!2}=C^2$$</div>
+    <div class="line fragment" data-fragment-index="2">$$\frac{(y')^2}{1+(y')^2}=C^2$$</div>
+    <div class="line fragment" data-fragment-index="3">$$(y')^2=C^2\!\left(1+(y')^2\right)$$</div>
+    <div class="line fragment" data-fragment-index="4">$$(y')^2=C^2+C^2(y')^2$$</div>
+    <div class="line fragment" data-fragment-index="5">$$(1-C^2)(y')^2=C^2$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 32 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(y')^2=\frac{C^2}{1-C^2}=\text{constante}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$y'=\text{constante}=m$$</div>
+    <div class="line fragment" data-fragment-index="2">$$y=mx+b$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 33 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment eq-big">$$\boxed{y(x)=mx+b}$$</p>
+  <p class="fragment">La curva extremal es una recta.</p>
+  <p class="fragment">La afirmación geométrica "la distancia más corta entre dos puntos es la recta" aparece como solución de un problema variacional.</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 34 ═══════════════════ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box">
+    <p>¿Qué pasa si $\Phi$ no depende explícitamente de $x$?</p>
+  </div>
+  <ul class="teoria-list">
+    <li class="fragment">En ese caso aparece una primera integral útil.</li>
+    <li class="fragment">Conviene derivarla una vez, porque después aparece muchas veces.</li>
+    <li class="fragment">Supongamos que $\;\Phi=\Phi(y,y')$, sin dependencia explícita en $x$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 35 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0$$</div>
+    <div class="line fragment" data-fragment-index="1">$$y'\frac{\partial\Phi}{\partial y}-y'\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\frac{d\Phi}{dx}=\frac{\partial\Phi}{\partial y}y'+\frac{\partial\Phi}{\partial y'}y''$$</div>
+    <div class="line fragment" data-fragment-index="3">$$\frac{d}{dx}\!\left(y'\frac{\partial\Phi}{\partial y'}\right)=y''\frac{\partial\Phi}{\partial y'}+y'\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 36 ═══════════════════ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{d}{dx}\!\left(\Phi-y'\frac{\partial\Phi}{\partial y'}\right)=\frac{d\Phi}{dx}-\frac{d}{dx}\!\left(y'\frac{\partial\Phi}{\partial y'}\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$=\!\left(\frac{\partial\Phi}{\partial y}y'+\frac{\partial\Phi}{\partial y'}y''\right)-\!\left(y''\frac{\partial\Phi}{\partial y'}+y'\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\right)$$</div>
+    <div class="line fragment" data-fragment-index="2">$$=\;y'\!\left[\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\right]$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 37 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Por Euler-Lagrange, el corchete es cero. Entonces</p>
+  <p class="fragment eq-big">$$\boxed{\frac{d}{dx}\!\left(\Phi-y'\frac{\partial\Phi}{\partial y'}\right)=0}$$</p>
+  <p class="fragment">y por tanto</p>
+  <p class="fragment eq-big">$$\boxed{\Phi-y'\frac{\partial\Phi}{\partial y'}=\text{constante}}$$</p>
+  <p class="fragment">Esta es la <strong>identidad de Beltrami</strong>.</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 38 ═══════════════════ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Resumen del bloque:</li>
+    <li class="fragment">1.&nbsp; Se define una funcional $I[y]$.</li>
+    <li class="fragment">2.&nbsp; Se deforma la curva: $Y=y+\varepsilon\eta$.</li>
+    <li class="fragment">3.&nbsp; Se expande a primer orden en $\varepsilon$.</li>
+    <li class="fragment">4.&nbsp; Se define la primera variación $\delta I$.</li>
+    <li class="fragment">5.&nbsp; Se integra por partes.</li>
+    <li class="fragment">6.&nbsp; Se usa que $\eta(x_1)=\eta(x_2)=0$.</li>
+    <li class="fragment">7.&nbsp; Se usa que $\eta$ es arbitraria en el interior.</li>
+    <li class="fragment">8.&nbsp; Sale Euler-Lagrange.</li>
+    <li class="fragment">9.&nbsp; En casos especiales ($\Phi$ sin $x$ explícita) aparece Beltrami.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 39 ═══════════════════ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Fórmula central del bloque:</p>
+  <p class="fragment eq-big">$$\boxed{\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0}$$</p>
+  <p class="fragment">Idea central del bloque:</p>
+  <p class="fragment eq-big">$$\boxed{\text{una condición global sobre curvas produce una ecuación diferencial}}$$</p>
+</div>
+</div>
+
+<!-- ═══════════════════ SLIDE 40 ═══════════════════ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="max-width:880px;width:100%;">
+  <ul class="teoria-list">
+    <li class="fragment">En la siguiente parte, el paso natural es reemplazar</li>
+    <li class="fragment eq-only">$$x \to t,\qquad y(x)\to q(t),\qquad \Phi(x,y,y')\to L(q,\dot{q},t)$$</li>
+    <li class="fragment">y entonces la funcional pasa a ser la acción</li>
+    <li class="fragment eq-only">$$S[q]=\int_{t_1}^{t_2}L(q,\dot{q},t)\,dt$$</li>
+    <li class="fragment">Recién ahí aparece el principio de Hamilton y las ecuaciones de Euler-Lagrange en mecánica.</li>
+  </ul>
+</div>
+</div>
+
+</div><!-- /slides-container -->
+
+<div class="nav-overlay">
+  <div class="slide-counter"><span id="cur">1</span>&thinsp;/&thinsp;40</div>
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="prev()">&#8592;</button>
+    <button class="nav-btn" onclick="next()">&#8594;</button>
+  </div>
+</div>
+<div class="progress-bar" id="pb"></div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+let cur = 0;
+
+function getFragments(sl) {
+  const frags = Array.from(sl.querySelectorAll('.fragment'));
+  frags.sort((a, b) => {
+    const ia = a.dataset.fragmentIndex !== undefined ? parseInt(a.dataset.fragmentIndex) : 9999;
+    const ib = b.dataset.fragmentIndex !== undefined ? parseInt(b.dataset.fragmentIndex) : 9999;
+    return ia - ib;
+  });
+  return frags;
+}
+
+function updateUI() {
+  slides.forEach((s, i) => {
+    s.classList.remove('past', 'present', 'future');
+    if (i < cur) s.classList.add('past');
+    else if (i === cur) s.classList.add('present');
+    else s.classList.add('future');
+  });
+  document.getElementById('cur').textContent = cur + 1;
+  const pct = cur === 0 ? 0 : (cur / (slides.length - 1)) * 100;
+  document.getElementById('pb').style.width = pct + '%';
+}
+
+function next() {
+  const sl = slides[cur];
+  const frags = getFragments(sl);
+  const nxt = frags.find(f => !f.classList.contains('visible'));
+  if (nxt) {
+    nxt.classList.add('visible');
+  } else if (cur < slides.length - 1) {
+    cur++;
+    updateUI();
+  }
+}
+
+function prev() {
+  const sl = slides[cur];
+  const frags = getFragments(sl);
+  const vis = frags.filter(f => f.classList.contains('visible'));
+  if (vis.length > 0) {
+    vis[vis.length - 1].classList.remove('visible');
+  } else if (cur > 0) {
+    cur--;
+    updateUI();
+    getFragments(slides[cur]).forEach(f => f.classList.add('visible'));
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
+  if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); prev(); }
+});
+
+function initPresentation() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '$',  right: '$',  display: false }
+    ],
+    throwOnError: false
+  });
+  updateUI();
+}
+</script>
+</body>
+</html>

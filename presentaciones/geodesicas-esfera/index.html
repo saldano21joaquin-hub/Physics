@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problema 2: Geodésicas Esféricas - Círculos Máximos</title>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 50px 110px 50px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f5f1e8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 95px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .slide-marker {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #2ecc71, transparent);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .portada {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 25px;
+        }
+
+        .portada-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .portada-subtitle {
+            font-size: 1.7rem;
+            color: #5a5a5a;
+            margin-top: 10px;
+            line-height: 1.3;
+        }
+
+        .portada-divider {
+            width: 250px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #e0a456, transparent);
+            margin: 20px 0;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .slide-title.section {
+            font-size: 2rem;
+            color: #e0a456;
+        }
+
+        .content-text {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            line-height: 1.7;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .content-list {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+            line-height: 1.85;
+        }
+
+        .content-list li {
+            margin-bottom: 12px;
+        }
+
+        .math-block {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(224, 160, 86, 0.05);
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex: 1;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .column-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e0a456;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .column-content {
+            font-size: 1.15rem;
+            color: #2c2c2c;
+            line-height: 1.9;
+        }
+
+        .equation-line {
+            margin: 12px 0;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            font-size: 0.95rem;
+            color: #888888;
+            z-index: 10;
+            min-height: 70px;
+            border-top: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-left, .footer-center, .footer-right {
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        .footer-left {
+            text-align: left;
+            padding-right: 20px;
+        }
+
+        .footer-center {
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .footer-right {
+            text-align: right;
+            padding-left: 20px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e0e0e0;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #2c2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #f5f1e8;
+            border-color: #e0a456;
+            color: #e0a456;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.95rem;
+            color: #8a8a8a;
+            z-index: 100;
+        }
+
+        strong {
+            color: #e0a456;
+            font-weight: 700;
+        }
+
+        .boxed {
+            border: 2px solid #e0a456;
+            padding: 15px 25px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 20px 0;
+            background: rgba(224, 160, 86, 0.08);
+        }
+
+        .nav-link-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .nav-link-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #e0e0e0;
+            color: #2c2c2c;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .nav-link-btn:hover {
+            background: #e0a456;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+
+        <!-- SLIDE 1: Portada -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="portada">
+                    <div class="portada-title">Problema 2: Geodésicas Esféricas</div>
+                    <div class="portada-subtitle">¿Cuál es el camino más corto sobre una esfera?</div>
+                    <div class="portada-divider"></div>
+                    <div style="font-size: 1.2rem; color: #6a6a6a; margin-top: 30px;">
+                        Demostración completa de que las geodésicas en una esfera son <strong>círculos máximos</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Conexión y Navegación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title section">Conexión con la Teoría</h1>
+                <ul class="content-list">
+                    <li>Este problema es una <strong>aplicación directa</strong> de los conceptos vistos en la Ayudantía 1:</li>
+                    <li style="margin-left: 30px;">✓ Extremización de funcionales geométricas</li>
+                    <li style="margin-left: 30px;">✓ Primera integral de Beltrami (herramienta clave)</li>
+                    <li style="margin-left: 30px;">✓ Cambios de variable trigonométricos</li>
+                    <li style="margin-left: 30px;">✓ Ecuaciones diferenciales ordinarias</li>
+                    <li style="margin-left: 30px;">✓ Interpretación geométrica de soluciones</li>
+                </ul>
+                <div class="nav-link-section" style="text-align: center;">
+                    <a href="../ayudantia1-variacional-euler-lagrange/index.html" class="nav-link-btn">← Volver a Ayudantía 1</a>
+                    <a href="../braquistocrona/index.html" class="nav-link-btn">↔ Ir a Braquistócrona</a>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Enunciado del Problema -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Enunciado del Problema 2</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto; background: rgba(224, 160, 86, 0.1); padding: 20px; border-left: 4px solid #e0a456; border-radius: 4px; font-size: 1.1rem; line-height: 1.7;">
+                    Demostrar que las geodésicas de una superficie esférica son círculos máximos, es decir, circunferencias cuyos centros coinciden con el centro de la esfera.
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Sección 1 - Qué significa geodésica -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">1. Qué significa geodésica sobre una superficie</h1>
+                <ul class="content-list">
+                    <li>En una superficie, una <strong>geodésica</strong> es la curva que hace <strong>estacionaria la longitud</strong> entre dos puntos cercanos de la superficie.</li>
+                    <li>No estamos minimizando una distancia en todo el espacio $\mathbb{R}^3$, sino una distancia <strong>restringida a la superficie</strong>.</li>
+                    <li>El objeto que hay que extremizar es la <strong>longitud de arco</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$s = \int ds$$</li>
+                    <li>En general, si una superficie está parametrizada por dos coordenadas, la geodésica sale de <strong>extremizar esa longitud</strong> respecto de curvas permitidas sobre la superficie.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Sección 1 - Continuación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">1. Planteamiento del problema</h1>
+                <ul class="content-list">
+                    <li>Aquí la superficie es una <strong>esfera</strong>.</li>
+                    <li>Entonces el problema se reduce a:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed">$$\text{Entre todas las curvas que unen dos puntos sobre la esfera,}$$<br/>$$\text{hallar la que hace estacionaria la longitud.}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Sección 2 - Coordenadas -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">2. Ecuación de la esfera y coordenadas convenientes</h1>
+                <ul class="content-list">
+                    <li>Consideremos una esfera de radio $a$. En coordenadas esféricas:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r = a, \quad \theta = \text{ángulo polar}, \quad \phi = \text{ángulo azimutal}$$</li>
+                    <li>Como la partícula o curva está obligada a vivir <strong>sobre la esfera</strong>, el radio no varía:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r = a = \text{constante}$$</li>
+                    <li>Por tanto, la curva queda completamente descrita por una <strong>relación entre $\theta$ y $\phi$</strong>.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Sección 2 - Parametrización -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">2. Representación de la curva</h1>
+                <ul class="content-list">
+                    <li>Lo más natural será escribir la curva como:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\theta = \theta(\phi)$$</li>
+                    <li><strong>Salvedad técnica importante:</strong> si la geodésica fuera un meridiano exacto, entonces $\phi$ sería constante y esta representación falla.</li>
+                    <li>Pero no hay problema: al final veremos que los meridianos también son <strong>círculos máximos</strong>, así que quedarán incluidos como caso especial o límite.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Sección 3 - Elemento de línea -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Elemento de arco sobre la esfera - Parte I</h1>
+                <ul class="content-list">
+                    <li>En coordenadas esféricas, el elemento de línea en $\mathbb{R}^3$ es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = dr^2 + r^2 d\theta^2 + r^2 \sin^2\theta \, d\phi^2$$</li>
+                    <li>Como estamos sobre la esfera donde $r = a$ (constante), tenemos $dr = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = a^2 d\theta^2 + a^2 \sin^2\theta \, d\phi^2$$</li>
+                    <li>Sacamos factor $a^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = a^2 \left(d\theta^2 + \sin^2\theta \, d\phi^2\right)$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Sección 3 - Elemento de línea (continuación) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Elemento de arco sobre la esfera - Parte II</h1>
+                <ul class="content-list">
+                    <li>Si la curva se escribe como $\theta = \theta(\phi)$, entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$d\theta = \theta'(\phi) \, d\phi$$</li>
+                    <li>donde $\theta' = \dfrac{d\theta}{d\phi}$.</li>
+                    <li>Sustituyendo en la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = a^2 \left[(\theta')^2 d\phi^2 + \sin^2\theta \, d\phi^2\right]$$</li>
+                    <li>Factorizamos $d\phi^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = a^2 \left[(\theta')^2 + \sin^2\theta\right] d\phi^2$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Sección 3 - Longitud total -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Longitud total de la curva</h1>
+                <ul class="content-list">
+                    <li>Tomamos raíz de $ds^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds = a \sqrt{(\theta')^2 + \sin^2\theta} \, d\phi$$</li>
+                    <li>Por tanto, la <strong>longitud total</strong> de una curva sobre la esfera entre dos azimutes $\phi_1$ y $\phi_2$ es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$s[\theta] = a\int_{\phi_1}^{\phi_2} \sqrt{(\theta')^2 + \sin^2\theta} \, d\phi$$</li>
+                    <li><strong>Ésta es la funcional que debemos extremizar.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Sección 4 - La funcional -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">4. La funcional del problema</h1>
+                <ul class="content-list">
+                    <li>Podemos escribir la longitud como:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[\theta] = a\int_{\phi_1}^{\phi_2} \sqrt{(\theta')^2 + \sin^2\theta} \, d\phi$$</li>
+                    <li>El factor $a$ es una constante y <strong>no afecta la ecuación extremal</strong>. Basta estudiar:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[\theta] = \int_{\phi_1}^{\phi_2} \Phi(\theta, \theta') \, d\phi$$</li>
+                    <li>donde el integrando es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(\theta, \theta') = \sqrt{(\theta')^2 + \sin^2\theta}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Sección 4 - Observación crucial -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">4. La herramienta correcta: Beltrami</h1>
+                <ul class="content-list">
+                    <li><strong>Observación crucial:</strong> $\Phi(\theta, \theta')$ <strong>no depende explícitamente de $\phi$</strong>.</li>
+                    <li>Entonces, en vez de usar <strong>Euler–Lagrange en su forma larga</strong>, conviene usar la <strong>identidad de Beltrami</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed">$$\Phi - \theta' \frac{\partial \Phi}{\partial \theta'} = \text{constante}$$</span></li>
+                    <li><strong>Ése es el patrón correcto de este ejercicio.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Sección 5 - Cálculo de derivada -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">5. Cálculo de $\frac{\partial \Phi}{\partial \theta'}$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>Partimos de:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi = \sqrt{(\theta')^2 + \sin^2\theta}$$</li>
+                    <li>Derivamos respecto de $\theta'$ (tratando $\theta$ como constante):</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial \theta'} = \frac{\partial}{\partial \theta'} \sqrt{(\theta')^2 + \sin^2\theta}$$</li>
+                    <li>Usamos la regla de la cadena:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{1}{2\sqrt{(\theta')^2 + \sin^2\theta}} \cdot 2\theta'$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: Sección 5 - Resultado -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">5. Cálculo de $\frac{\partial \Phi}{\partial \theta'}$ - Resultado</h1>
+                <ul class="content-list">
+                    <li>Del cálculo anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial \theta'} = \frac{1}{2\sqrt{(\theta')^2 + \sin^2\theta}} \cdot 2\theta' = \frac{2\theta'}{2\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                    <li>Simplificamos el factor 2:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{\partial \Phi}{\partial \theta'} = \frac{\theta'}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: Sección 6 - Aplicación de Beltrami Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Aplicación de Beltrami - Parte I</h1>
+                <ul class="content-list">
+                    <li>Ahora calculamos $\Phi - \theta' \dfrac{\partial \Phi}{\partial \theta'}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi - \theta' \frac{\partial \Phi}{\partial \theta'} = \sqrt{(\theta')^2 + \sin^2\theta} - \theta' \cdot \frac{\theta'}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \sqrt{(\theta')^2 + \sin^2\theta} - \frac{(\theta')^2}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: Sección 6 - Aplicación de Beltrami Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Aplicación de Beltrami - Parte II (Denominador común)</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sqrt{(\theta')^2 + \sin^2\theta} - \frac{(\theta')^2}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                    <li>Llevamos a denominador común $\sqrt{(\theta')^2 + \sin^2\theta}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(\theta')^2 + \sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} - \frac{(\theta')^2}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(\theta')^2 + \sin^2\theta - (\theta')^2}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: Sección 6 - Primera integral de Beltrami -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Primera Integral de Beltrami Aplicada</h1>
+                <ul class="content-list">
+                    <li>Del cálculo anterior, los $(\theta')^2$ se cancelan:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}}$$</li>
+                    <li>La identidad de Beltrami dice que esta expresión es <strong>constante</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} = C$$</span></li>
+                    <li>donde $C$ es una constante arbitraria determinada por condiciones de frontera.</li>
+                    <li><strong>Ésta es ya una primera integral del problema.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: Sección 7 - Reordenamiento Algebraico Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Reordenamiento Algebraico - Parte I</h1>
+                <ul class="content-list">
+                    <li>Partimos de la primera integral:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} = C$$</li>
+                    <li>Multiplicamos ambos lados por $\sqrt{(\theta')^2 + \sin^2\theta}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^2\theta = C \sqrt{(\theta')^2 + \sin^2\theta}$$</li>
+                    <li>Elevamos ambos lados al cuadrado:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^4\theta = C^2 \left[(\theta')^2 + \sin^2\theta\right]$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: Sección 7 - Reordenamiento Algebraico Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Reordenamiento Algebraico - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^4\theta = C^2 \left[(\theta')^2 + \sin^2\theta\right]$$</li>
+                    <li>Expandimos el lado derecho:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^4\theta = C^2 (\theta')^2 + C^2 \sin^2\theta$$</li>
+                    <li>Llevamos el término $C^2 \sin^2\theta$ al lado izquierdo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^4\theta - C^2 \sin^2\theta = C^2 (\theta')^2$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: Sección 7 - Reordenamiento Algebraico Parte III -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Reordenamiento Algebraico - Parte III</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^4\theta - C^2 \sin^2\theta = C^2 (\theta')^2$$</li>
+                    <li>Factorizamos $\sin^2\theta$ en el lado izquierdo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^2\theta \left(\sin^2\theta - C^2\right) = C^2 (\theta')^2$$</li>
+                    <li>Despejamos $(\theta')^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(\theta')^2 = \frac{\sin^2\theta \left(\sin^2\theta - C^2\right)}{C^2}$$</li>
+                    <li><strong>Esto todavía no está en forma muy cómoda.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: Sección 8 - Sustitución u = cot(theta) Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">8. Sustitución $u = \cot\theta$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>La sustitución estándar que simplifica mucho el problema es:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$u = \cot\theta = \frac{\cos\theta}{\sin\theta}$$</span></li>
+                    <li>De esta definición usamos la identidad trigonométrica:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$1 + u^2 = 1 + \cot^2\theta = \csc^2\theta = \frac{1}{\sin^2\theta}$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\sin^2\theta = \frac{1}{1 + u^2}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 21: Sección 8 - Sustitución u = cot(theta) Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">8. Sustitución $u = \cot\theta$ - Parte II (Derivada de u)</h1>
+                <ul class="content-list">
+                    <li>Derivamos $u$ respecto de $\phi$. Como $u = \cot\theta$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{du}{d\phi} = \frac{d}{d\phi}(\cot\theta) = -\csc^2\theta \cdot \frac{d\theta}{d\phi}$$</li>
+                    <li>Es decir:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$u' = -\csc^2\theta \cdot \theta'$$</li>
+                    <li>Como $\csc^2\theta = \dfrac{1}{\sin^2\theta}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$u' = -\frac{\theta'}{\sin^2\theta}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22: Sección 8 - Relación entre theta' y u' -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">8. Relación entre $\theta'$ y $u'$</h1>
+                <ul class="content-list">
+                    <li>De $u' = -\dfrac{\theta'}{\sin^2\theta}$, despejamos $\theta'$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\theta' = -u' \sin^2\theta$$</li>
+                    <li>Pero sabemos que $\sin^2\theta = \dfrac{1}{1 + u^2}$, así que:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\theta' = -\frac{u'}{1 + u^2}$$</span></li>
+                    <li>Elevando al cuadrado:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(\theta')^2 = \frac{(u')^2}{(1 + u^2)^2}$$</li>
+                    <li><strong>Estas relaciones serán cruciales para transformar la primera integral.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: Sección 9 - Transformación de la raíz Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">9. Reescritura en términos de $u$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>Volvemos a la expresión:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} = C$$</li>
+                    <li>Ya sabemos que:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin^2\theta = \frac{1}{1 + u^2}, \quad (\theta')^2 = \frac{(u')^2}{(1 + u^2)^2}$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(\theta')^2 + \sin^2\theta = \frac{(u')^2}{(1 + u^2)^2} + \frac{1}{1 + u^2}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 24: Sección 9 - Transformación de la raíz Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">9. Reescritura en términos de $u$ - Parte II (Denominador común)</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(\theta')^2 + \sin^2\theta = \frac{(u')^2}{(1 + u^2)^2} + \frac{1}{1 + u^2}$$</li>
+                    <li>Llevamos a denominador común $(1 + u^2)^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(u')^2}{(1 + u^2)^2} + \frac{1 + u^2}{(1 + u^2)^2}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(u')^2 + (1 + u^2)}{(1 + u^2)^2}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(u')^2 + u^2 + 1}{(1 + u^2)^2}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25: Sección 9 - Raíz cuadrada -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">9. Reescritura en términos de $u$ - Parte III (Raíz cuadrada)</h1>
+                <ul class="content-list">
+                    <li>Tomamos raíz cuadrada de la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sqrt{(\theta')^2 + \sin^2\theta} = \sqrt{\frac{(u')^2 + u^2 + 1}{(1 + u^2)^2}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{\sqrt{(u')^2 + u^2 + 1}}{\sqrt{(1 + u^2)^2}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{\sqrt{(u')^2 + u^2 + 1}}{1 + u^2}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26: Sección 9 - Primera integral en términos de u -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">9. Primera Integral en Términos de $u$</h1>
+                <ul class="content-list">
+                    <li>Ahora sustituimos en la primera integral:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} = \frac{\dfrac{1}{1+u^2}}{\dfrac{\sqrt{(u')^2 + u^2 + 1}}{1+u^2}}$$</li>
+                    <li>Los factores $(1 + u^2)$ se cancelan:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{1}{\sqrt{(u')^2 + u^2 + 1}}$$</li>
+                    <li>Entonces obtenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{1}{\sqrt{(u')^2 + u^2 + 1}} = C$$</span></li>
+                    <li><strong>Esta forma ya es mucho más simple que la anterior.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: Sección 10 - Nueva ecuación diferencial Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">10. Nueva ecuación diferencial - Parte I</h1>
+                <ul class="content-list">
+                    <li>De la primera integral simplificada:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{1}{\sqrt{(u')^2 + u^2 + 1}} = C$$</li>
+                    <li>Invertimos ambos lados:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sqrt{(u')^2 + u^2 + 1} = \frac{1}{C}$$</li>
+                    <li>Elevamos ambos lados al cuadrado:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(u')^2 + u^2 + 1 = \frac{1}{C^2}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 28: Sección 10 - Nueva ecuación diferencial Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">10. Nueva ecuación diferencial - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(u')^2 + u^2 + 1 = \frac{1}{C^2}$$</li>
+                    <li>Definimos una constante nueva $A^2$ por:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$A^2 = \frac{1}{C^2} - 1$$</li>
+                    <li>Entonces, al restar 1 de ambos lados de la ecuación anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(u')^2 + u^2 = \frac{1}{C^2} - 1 = A^2$$</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$(u')^2 + u^2 = A^2$$</span></li>
+                    <li><strong>Ésta ya es una ecuación muy familiar.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 29: Sección 11 - Paso a ecuación lineal Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">11. Paso a ecuación lineal - Parte I (Derivar)</h1>
+                <ul class="content-list">
+                    <li>Tenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(u')^2 + u^2 = A^2$$</li>
+                    <li>Derivamos respecto de $\phi$. El lado derecho es una constante, así que su derivada es cero:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{d\phi}\left[(u')^2 + u^2\right] = \frac{d}{d\phi}(A^2) = 0$$</li>
+                    <li>Aplicamos la regla de la cadena al lado izquierdo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2u' \cdot u'' + 2u \cdot u' = 0$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 30: Sección 11 - Paso a ecuación lineal Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">11. Paso a ecuación lineal - Parte II (Factorizar)</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2u' u'' + 2u u' = 0$$</li>
+                    <li>Sacamos factor común $2u'$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2u'(u'' + u) = 0$$</li>
+                    <li>Esto significa que o bien $2u' = 0$ (caso trivial) o bien $u'' + u = 0$.</li>
+                    <li>En casos no triviales, concluimos:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$u'' + u = 0$$</span></li>
+                    <li><strong>Ésta es la ecuación del oscilador armónico simple.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 31: Sección 12 - Solución general -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">12. Solución general</h1>
+                <ul class="content-list">
+                    <li>La solución general de:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$u'' + u = 0$$</li>
+                    <li>es bien conocida:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$u(\phi) = A\cos(\phi - \phi_0)$$</span></li>
+                    <li>o equivalentemente:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$u(\phi) = B\cos\phi + D\sin\phi$$</span></li>
+                    <li>donde $A, B, D, \phi_0$ son constantes arbitrarias determinadas por condiciones de frontera.</li>
+                    <li>Volviendo a $u = \cot\theta$:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\cot\theta = A\cos(\phi - \phi_0)$$</span></li>
+                    <li><strong>Ésta es la ecuación de la curva extremal sobre la esfera.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 32: Sección 13 - Paso a cartesianas Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">13. Paso a coordenadas cartesianas - Parte I</h1>
+                <ul class="content-list">
+                    <li>Usamos la parametrización usual de la esfera de radio $a$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$X = a\sin\theta\cos\phi, \quad Y = a\sin\theta\sin\phi, \quad Z = a\cos\theta$$</li>
+                    <li>Partimos de:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cot\theta = A\cos(\phi - \phi_0)$$</li>
+                    <li>Expandimos el coseno de la diferencia:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cos(\phi - \phi_0) = \cos\phi\cos\phi_0 + \sin\phi\sin\phi_0$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cot\theta = A(\cos\phi\cos\phi_0 + \sin\phi\sin\phi_0)$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 33: Sección 13 - Paso a cartesianas Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">13. Paso a coordenadas cartesianas - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cot\theta = A(\cos\phi\cos\phi_0 + \sin\phi\sin\phi_0)$$</li>
+                    <li>Multiplicamos ambos lados por $\sin\theta$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cos\theta = A\sin\theta(\cos\phi\cos\phi_0 + \sin\phi\sin\phi_0)$$</li>
+                    <li>Separamos los términos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cos\theta = A\sin\theta\cos\phi\cos\phi_0 + A\sin\theta\sin\phi\sin\phi_0$$</li>
+                    <li>Multiplicamos por $a$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$a\cos\theta = Aa\sin\theta\cos\phi\cos\phi_0 + Aa\sin\theta\sin\phi\sin\phi_0$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 34: Sección 13 - Paso a cartesianas Parte III -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">13. Paso a coordenadas cartesianas - Parte III (Reconocer)</h1>
+                <ul class="content-list">
+                    <li>Recordamos la parametrización:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Z = a\cos\theta, \quad X = a\sin\theta\cos\phi, \quad Y = a\sin\theta\sin\phi$$</li>
+                    <li>Entonces la ecuación:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$a\cos\theta = Aa\sin\theta\cos\phi\cos\phi_0 + Aa\sin\theta\sin\phi\sin\phi_0$$</li>
+                    <li>se puede reescribir como:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Z = AX\cos\phi_0 + AY\sin\phi_0$$</li>
+                    <li>Llevando todo a un lado:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$Z - AX\cos\phi_0 - AY\sin\phi_0 = 0$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 35: Sección 14 - Interpretación Geométrica Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">14. Interpretación Geométrica Final - Parte I</h1>
+                <ul class="content-list">
+                    <li>La ecuación que encontramos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Z - AX\cos\phi_0 - AY\sin\phi_0 = 0$$</li>
+                    <li>es la ecuación de un <strong>plano</strong> en el espacio tridimensional.</li>
+                    <li>Podemos reescribirla como:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Z = AX\cos\phi_0 + AY\sin\phi_0$$</li>
+                    <li>Este plano tiene una propiedad crucial: <strong>pasa por el origen (0, 0, 0)</strong>.</li>
+                    <li>¿Por qué? Porque no hay término independiente en la ecuación.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 36: Sección 14 - Interpretación Geométrica Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">14. Interpretación Geométrica Final - Parte II</h1>
+                <ul class="content-list">
+                    <li>Así, la geodésica es la <strong>intersección</strong> entre:</li>
+                    <li style="margin-left: 30px; margin-top: 20px;">• La <strong>esfera</strong>: $X^2 + Y^2 + Z^2 = a^2$</li>
+                    <li style="margin-left: 30px;">• Un <strong>plano que pasa por el centro</strong> (el origen) de la esfera</li>
+                    <li style="margin-top: 30px;">Cuando una esfera se corta con un plano que pasa por su centro, la intersección es siempre una <strong>circunferencia</strong> cuyo radio es igual al radio de la esfera.</li>
+                    <li>Este círculo se llama <strong>círculo máximo</strong>.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 37: Sección 14 - Conclusión -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">14. Conclusión: Círculos Máximos</h1>
+                <ul class="content-list">
+                    <li>Un <strong>círculo máximo</strong> es una circunferencia cuyo:</li>
+                    <li style="margin-left: 30px;">• Radio es igual al radio de la esfera ($a$)</li>
+                    <li style="margin-left: 30px;">• Centro coincide con el centro de la esfera</li>
+                    <li style="margin-left: 30px;">• Es el mayor círculo que se puede trazar sobre la esfera</li>
+                    <li style="margin-top: 30px; text-align: center; margin-left: -50px;"><span class="boxed" style="font-size: 1.4rem;">$$\text{Las geodésicas de la esfera son CÍRCULOS MÁXIMOS.}$$</span></li>
+                    <li style="margin-top: 20px;"><strong>Eso era exactamente lo que había que demostrar.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 38: Sección 15 - Meridianos -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">15. Qué pasa con los meridianos</h1>
+                <ul class="content-list">
+                    <li>Dije al principio que la representación $\theta = \theta(\phi)$ falla si $\phi$ es constante, lo que corresponde precisamente a un <strong>meridiano</strong>.</li>
+                    <li>Pero un meridiano también es la <strong>intersección de la esfera con un plano</strong> que pasa por el centro (ese plano contiene el eje $z$).</li>
+                    <li>Así que un meridiano también es un <strong>círculo máximo</strong>.</li>
+                    <li style="margin-top: 30px;"><strong>No hay contradicción:</strong> simplemente los meridianos no se capturan cómodamente con la parametrización $\theta(\phi)$, pero sí pertenecen a la misma <strong>familia geométrica final</strong> de círculos máximos.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 39: Sección 16 - Gráficos -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">16. Qué muestran los gráficos</h1>
+                <ul class="content-list">
+                    <li><strong>Primer gráfico:</strong> Geodésica sobre la esfera (3D)</li>
+                    <li style="margin-left: 30px;">• La esfera</li>
+                    <li style="margin-left: 30px;">• Un arco geodésico entre dos puntos $A$ y $B$</li>
+                    <li style="margin-left: 30px;">• El círculo máximo completo que contiene ese arco</li>
+                    <li style="margin-left: 30px;">• Un círculo pequeño, que NO es geodésica</li>
+                    <li style="margin-top: 15px;"><strong>Segundo gráfico:</strong> Planos e intersecciones con la esfera</li>
+                    <li style="margin-left: 30px;">• A la izquierda: plano que SÍ pasa por el centro → círculo máximo</li>
+                    <li style="margin-left: 30px;">• A la derecha: plano que NO pasa por el centro → círculo pequeño</li>
+                    <li style="margin-top: 15px;"><strong>El contraste visual es exactamente la diferencia entre geodésica y no geodésica.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 40: Sección 17 - Resumen limpio Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">17. Resumen Limpio - Parte I</h1>
+                <ul class="content-list">
+                    <li><strong>Longitud sobre la esfera</strong> de radio $a$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[\theta] = a\int_{\phi_1}^{\phi_2} \sqrt{(\theta')^2 + \sin^2\theta} \, d\phi$$</li>
+                    <li style="margin-top: 20px;"><strong>Como el integrando no depende explícitamente de $\phi$</strong>, usamos <strong>Beltrami</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2 + \sin^2\theta}} = C$$</li>
+                    <li style="margin-top: 20px;"><strong>Con la sustitución</strong> $u = \cot\theta$, se llega a:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(u')^2 + u^2 = A^2$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 41: Sección 17 - Resumen limpio Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">17. Resumen Limpio - Parte II</h1>
+                <ul class="content-list">
+                    <li><strong>Derivando la ecuación anterior:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$u'' + u = 0$$</li>
+                    <li style="margin-top: 20px;"><strong>La solución da:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$\cot\theta = A\cos(\phi - \phi_0)$$</li>
+                    <li style="margin-top: 20px;"><strong>Pasando a coordenadas cartesianas:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$Z - AX\cos\phi_0 - AY\sin\phi_0 = 0$$</li>
+                    <li style="margin-top: 20px;">que es un <strong>plano que pasa por el origen</strong>.</li>
+                    <li style="margin-top: 20px;">Así, la curva extrema es la <strong>intersección de la esfera con un plano que pasa por el centro</strong>, es decir:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px;"><span class="boxed" style="font-size: 1.3rem;">$$\text{UN CÍRCULO MÁXIMO}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 42: Ejercicios de Aplicación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejercicios de Aplicación - Tarea 5</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto;">
+                    <p class="content-text" style="font-size: 1.3rem; margin-bottom: 30px;">
+                        Ejercicios completados del cálculo variacional:
+                    </p>
+                    <ul class="content-list" style="font-size: 1.2rem; line-height: 2.3;">
+                        <li><strong style="color: #2ecc71;">✓ Problema 1:</strong> Geodésicas en superficies (teoría general)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 3:</strong> La Braquistócrona</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 2:</strong> Geodésicas Esféricas (esta presentación)</li>
+                    </ul>
+                    <p class="content-text" style="margin-top: 40px;">Navegación rápida:</p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="../ayudantia1-variacional-euler-lagrange/index.html" style="display: inline-block; padding: 12px 25px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">← Ayudantía 1</a>
+                        <a href="../braquistocrona/index.html" style="display: inline-block; padding: 12px 25px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">Braquistócrona</a>
+                        <a href="../fermat-indice-radial/index.html" style="display: inline-block; padding: 12px 25px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">Fermat →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">43</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prev-btn">←</button>
+        <button class="nav-button" id="next-btn">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.getElementById('next-btn').addEventListener('click', nextSlide);
+        document.getElementById('prev-btn').addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        showSlide(0);
+
+        // KaTeX auto-render
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

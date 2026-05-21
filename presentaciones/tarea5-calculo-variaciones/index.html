@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarea 5 — Cálculo de variaciones</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="initPresentation()"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#fff;overflow:hidden;
+  font-family:'KaTeX_Main','Computer Modern',Georgia,'Times New Roman',serif;
+  color:#2c2c2c;
+}
+.presentation{width:100vw;height:100vh;position:relative;overflow:hidden;}
+.presentation::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,#f7f3ec 0%,#faf8f5 50%,#f5f0e8 100%);
+  z-index:-1;
+}
+.slides-container{width:100%;height:100%;position:relative;}
+
+.slide{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:3.2rem 7rem;background:#fff;
+  transition:transform 0.8s cubic-bezier(0.26,0.86,0.44,0.985);
+}
+.slide.past  {transform:translateX(-100%);}
+.slide.present{transform:translateX(0);}
+.slide.future{transform:translateX(100%);}
+.slide::after{
+  content:'';position:absolute;inset:22px;
+  border:1px solid rgba(180,155,115,0.18);
+  pointer-events:none;z-index:50;
+}
+.slide::before{
+  content:'';position:absolute;
+  top:22px;left:22px;right:22px;height:2px;
+  background:linear-gradient(90deg,transparent 0%,rgba(180,155,115,0.35) 30%,rgba(180,155,115,0.35) 70%,transparent 100%);
+  pointer-events:none;z-index:51;
+}
+.fragment{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .45s ease,transform .45s ease;will-change:opacity,transform;
+}
+.fragment.visible{opacity:1;transform:translateY(0);}
+
+/* PORTADA */
+.slide-portada{text-align:center;}
+.slide-portada .titulo{font-size:3.4rem;color:#2c2c2c;line-height:1.22;margin-bottom:1.5rem;max-width:860px;}
+.slide-portada .sep{width:60px;height:2px;background:#d8cfc2;margin:0 auto 1.5rem;}
+.slide-portada .subtitulo{font-size:1.55rem;color:#888;font-style:italic;line-height:1.65;max-width:740px;}
+
+/* PREGUNTA + TEORÍA */
+.slide-teoria .inner{width:100%;max-width:920px;}
+.pregunta-box{
+  background:#f5f1e8;border-left:4px solid #2c2c2c;
+  padding:1rem 1.6rem;margin-bottom:1.8rem;border-radius:0 6px 6px 0;
+}
+.pregunta-box p{font-size:1.58rem;font-weight:600;line-height:1.4;color:#2c2c2c;}
+.teoria-list{list-style:none;width:100%;}
+.teoria-list li{
+  font-size:1.36rem;color:#2c2c2c;margin-bottom:.65rem;
+  padding-left:1.8rem;position:relative;line-height:1.75;
+}
+.teoria-list li::before{content:'—';position:absolute;left:0;color:#bbb;}
+.teoria-list li.eq-only{padding-left:0;text-align:center;}
+.teoria-list li.eq-only::before{content:'';}
+.slide-compact .teoria-list li{font-size:1.18rem;margin-bottom:.46rem;}
+
+/* CÁLCULOS DOS COLUMNAS */
+.slide-calculo .inner{width:100%;height:88%;display:flex;align-items:flex-start;gap:0;}
+.col{flex:1;display:flex;flex-direction:column;gap:.9rem;padding-top:.5rem;align-items:center;}
+.col .line{font-size:1.3rem;text-align:center;line-height:2.0;color:#1a1a1a;width:100%;}
+.col-divider{width:1px;background:#e0e0e0;align-self:stretch;margin:0 2rem;flex-shrink:0;}
+
+/* CONCLUSIÓN */
+.slide-conclusion{text-align:center;}
+.slide-conclusion .inner{max-width:940px;display:flex;flex-direction:column;align-items:center;gap:1.2rem;}
+.slide-conclusion p{font-size:1.4rem;color:#2c2c2c;line-height:1.7;}
+.slide-conclusion .eq-big{font-size:1.5rem;}
+
+/* CIERRE */
+.slide-cierre{}
+
+/* NAVEGACIÓN */
+.nav-overlay{
+  position:fixed;bottom:1.6rem;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 2.4rem;pointer-events:none;z-index:100;
+}
+.nav-overlay>*{pointer-events:all;}
+.slide-counter{font-family:monospace;font-size:1rem;color:#bbb;}
+.nav-btns{display:flex;gap:.4rem;}
+.nav-btn{
+  background:none;border:1px solid #e0e0e0;color:#2c2c2c;
+  padding:.32rem 1rem;cursor:pointer;border-radius:4px;
+  font-size:1.1rem;transition:background .2s;
+}
+.nav-btn:hover{background:#f5f1e8;}
+.progress-bar{position:fixed;bottom:0;left:0;height:2px;background:#2c2c2c;transition:width .4s ease;z-index:101;}
+</style>
+</head>
+<body>
+<div class="presentation">
+<div class="slides-container" id="sc">
+
+<!-- ═══ SLIDE 1 ═══ -->
+<div class="slide slide-portada present">
+  <h1 class="titulo">Tarea 5 — Cálculo de variaciones</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Problemas 1–5, desarrollados para presentación dinámica</p>
+</div>
+
+<!-- ═══ SLIDE 2 ═══ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Antes de entrar problema por problema, conviene mirar la estructura global.</li>
+    <li class="fragment">En todos estos ejercicios el objeto central es una curva.</li>
+    <li class="fragment">A cada curva se le asocia una funcional</li>
+    <li class="fragment eq-only">$$I[y]=\int \Phi(x,y,y')\,dx$$</li>
+    <li class="fragment">o bien una versión equivalente en otras coordenadas.</li>
+    <li class="fragment">La idea general es siempre la misma:</li>
+    <li class="fragment">1. identificar qué cantidad física o geométrica se extremiza</li>
+    <li class="fragment">2. escribirla como integral &nbsp; 3. aplicar Euler–Lagrange o una primera integral &nbsp; 4. interpretar geométricamente</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 3 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Hay tres patrones que aparecerán muchas veces:</li>
+    <li class="fragment">1. Si la funcional no depende explícitamente de la variable independiente, sirve Beltrami:</li>
+    <li class="fragment eq-only">$$\Phi-y'\dfrac{\partial\Phi}{\partial y'}=\text{cte}$$</li>
+    <li class="fragment">2. Si hay una restricción, puede entrar un multiplicador de Lagrange.</li>
+    <li class="fragment">3. Si el problema tiene simetría geométrica fuerte, la interpretación final suele ser tan importante como la ecuación.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 4 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 1</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Demostrar que la distancia más corta entre dos puntos del espacio es la línea recta</p>
+</div>
+
+<!-- ═══ SLIDE 5 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide exactamente este problema?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">No pide una recta en el plano, sino en el espacio.</li>
+    <li class="fragment">Eso significa que la curva tiene dos funciones dependientes si usamos $x$ como parámetro: $y=y(x)$ y $z=z(x)$.</li>
+    <li class="fragment">La funcional a extremizar es la longitud.</li>
+    <li class="fragment">El objetivo final no es solo resolver Euler–Lagrange, sino mostrar que las soluciones tienen la forma paramétrica de una recta.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 6 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Lo inmediato aquí es:</li>
+    <li class="fragment">1. escribir el elemento de arco en $\mathbb{R}^3$</li>
+    <li class="fragment">2. construir la longitud</li>
+    <li class="fragment">3. aplicar Euler–Lagrange a dos funciones, $y(x)$ y $z(x)$</li>
+    <li class="fragment">4. probar que ambas derivadas son constantes</li>
+    <li class="fragment">5. integrar y concluir que la curva es lineal en $x$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 7 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$ds^2=dx^2+dy^2+dz^2$$</div>
+    <div class="line fragment" data-fragment-index="1">$$ds=\sqrt{dx^2+dy^2+dz^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$dy=y'\,dx,\qquad dz=z'\,dx$$</div>
+    <div class="line fragment" data-fragment-index="3">$$ds=\sqrt{1+(y')^2+(z')^2}\,dx$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 8 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Entonces la longitud total entre $x_1$ y $x_2$ es</li>
+    <li class="fragment eq-only">$$I[y,z]=\int_{x_1}^{x_2}\sqrt{1+(y')^2+(z')^2}\,dx$$</li>
+    <li class="fragment">El integrando es $\;\Phi(y,z,y',z')=\sqrt{1+(y')^2+(z')^2}$</li>
+    <li class="fragment">Observación importante: $\Phi$ no depende explícitamente ni de $y$ ni de $z$.</li>
+    <li class="fragment">Eso simplifica mucho las ecuaciones de Euler–Lagrange.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 9 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{\partial \Phi}{\partial y}=0$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial \Phi}{\partial y'}=\frac{y'}{\sqrt{1+(y')^2+(z')^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\frac{\partial \Phi}{\partial z}=0$$</div>
+    <div class="line fragment" data-fragment-index="3">$$\frac{\partial \Phi}{\partial z'}=\frac{z'}{\sqrt{1+(y')^2+(z')^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 10 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{d}{dx}\!\left(\frac{\partial \Phi}{\partial y'}\right)-\frac{\partial \Phi}{\partial y}=0$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{d}{dx}\!\left(\frac{y'}{\sqrt{1+(y')^2+(z')^2}}\right)=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\frac{d}{dx}\!\left(\frac{\partial \Phi}{\partial z'}\right)-\frac{\partial \Phi}{\partial z}=0$$</div>
+    <div class="line fragment" data-fragment-index="3">$$\frac{d}{dx}\!\left(\frac{z'}{\sqrt{1+(y')^2+(z')^2}}\right)=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 11 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Las dos expresiones anteriores deben ser constantes:</p>
+  <p class="fragment">$$\frac{y'}{\sqrt{1+(y')^2+(z')^2}}=A$$</p>
+  <p class="fragment">$$\frac{z'}{\sqrt{1+(y')^2+(z')^2}}=B$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 12 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo sacamos de aquí que $y'$ y $z'$ son constantes?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Éste es el paso algebraico importante.</li>
+    <li class="fragment">No basta con dejar las razones iguales a constantes.</li>
+    <li class="fragment">Hay que demostrar que eso fuerza a que las derivadas mismas sean constantes.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 13 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y'=A\sqrt{1+(y')^2+(z')^2}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$z'=B\sqrt{1+(y')^2+(z')^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$(y')^2=A^2\!\left(1+(y')^2+(z')^2\right)$$</div>
+    <div class="line fragment" data-fragment-index="3">$$(z')^2=B^2\!\left(1+(y')^2+(z')^2\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 14 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(y')^2+(z')^2=(A^2+B^2)\!\left(1+(y')^2+(z')^2\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Sea $S=(y')^2+(z')^2$</div>
+    <div class="line fragment" data-fragment-index="2">$$S=(A^2+B^2)(1+S)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 15 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$S=(A^2+B^2)+(A^2+B^2)S$$</div>
+    <div class="line fragment" data-fragment-index="1">$$S-(A^2+B^2)S=A^2+B^2$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$S\left[1-(A^2+B^2)\right]=A^2+B^2$$</div>
+    <div class="line fragment" data-fragment-index="3">$$S=\frac{A^2+B^2}{1-(A^2+B^2)}=\text{constante}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 16 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Como $S$ es constante, entonces $\;\sqrt{1+(y')^2+(z')^2}=\sqrt{1+S}=\text{constante}$.</li>
+    <li class="fragment">Y por las ecuaciones:</li>
+    <li class="fragment eq-only">$y'=A\sqrt{1+S}=\text{constante}$</li>
+    <li class="fragment eq-only">$z'=B\sqrt{1+S}=\text{constante}$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 17 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y'=m$$</div>
+    <div class="line fragment" data-fragment-index="1">$$y=mx+b$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$z'=n$$</div>
+    <div class="line fragment" data-fragment-index="3">$$z=nx+c$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 18 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La curva queda escrita como</p>
+  <p class="fragment">$x=x,\quad y=mx+b,\quad z=nx+c$</p>
+  <p class="fragment">Ésta es la ecuación paramétrica de una <strong>línea recta en el espacio</strong>.</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 19 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">Patrón aprendido en el problema 1:</li>
+    <li class="fragment">si el integrando no depende explícitamente de la función, aparece una primera integral inmediata.</li>
+    <li class="fragment">En este caso hay dos funciones dependientes, pero el razonamiento es el mismo.</li>
+    <li class="fragment">El resultado geométrico final es:</li>
+    <li class="fragment eq-only">$$\boxed{\text{la distancia más corta entre dos puntos del espacio es la línea recta}}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 20 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 2</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Geodésicas de la esfera = círculos máximos</p>
+</div>
+
+<!-- ═══ SLIDE 21 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide exactamente este problema?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">No pide solo resolver una ecuación.</li>
+    <li class="fragment">Pide mostrar que las geodésicas sobre una esfera son círculos máximos.</li>
+    <li class="fragment">Entonces hay dos etapas:</li>
+    <li class="fragment">1. obtener la ecuación de la curva extrema sobre la esfera</li>
+    <li class="fragment">2. interpretar geométricamente y demostrar que es la intersección de la esfera con un plano que pasa por el centro</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 22 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Como la partícula está restringida a la superficie esférica de radio $a$, conviene usar coordenadas esféricas: $r=a$, $\theta=$ ángulo polar, $\phi=$ ángulo azimutal.</li>
+    <li class="fragment">Sobre la esfera, la curva queda descrita por $\theta=\theta(\phi)$</li>
+    <li class="fragment">y la longitud será una funcional de $\theta(\phi)$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 23 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$ds^2=dr^2+r^2d\theta^2+r^2\sin^2\theta\,d\phi^2$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Como $r=a$ es constante, $dr=0$</div>
+    <div class="line fragment" data-fragment-index="2">$$ds^2=a^2\!\left(d\theta^2+\sin^2\theta\,d\phi^2\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 24 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$d\theta=\theta'\,d\phi$, donde $\theta'=\dfrac{d\theta}{d\phi}$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$ds=a\sqrt{(\theta')^2+\sin^2\theta}\,d\phi$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 25 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Entonces la longitud sobre la esfera entre dos puntos dados es</li>
+    <li class="fragment eq-only">$$I[\theta]=a\int_{\phi_1}^{\phi_2}\sqrt{(\theta')^2+\sin^2\theta}\,d\phi$$</li>
+    <li class="fragment">Como el factor $a$ es constante, no afecta la ecuación extremal.</li>
+    <li class="fragment">Por tanto trabajamos con $\;\Phi(\theta,\theta')=\sqrt{(\theta')^2+\sin^2\theta}$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 26 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué es lo primero que conviene observar?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Que $\Phi$ no depende explícitamente de $\phi$.</li>
+    <li class="fragment">Eso sugiere usar Beltrami, no Euler–Lagrange en su forma larga.</li>
+    <li class="fragment">Entonces debemos usar</li>
+    <li class="fragment eq-only">$$\Phi-\theta'\dfrac{\partial\Phi}{\partial \theta'}=\text{constante}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 27 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi=\sqrt{(\theta')^2+\sin^2\theta}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial \theta'}=\frac{\theta'}{\sqrt{(\theta')^2+\sin^2\theta}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\Phi-\theta'\frac{\partial\Phi}{\partial \theta'}=\sqrt{(\theta')^2+\sin^2\theta}-\theta'\frac{\theta'}{\sqrt{(\theta')^2+\sin^2\theta}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 28 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi-\theta'\frac{\partial\Phi}{\partial \theta'}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=\frac{(\theta')^2+\sin^2\theta-(\theta')^2}{\sqrt{(\theta')^2+\sin^2\theta}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$=\frac{\sin^2\theta}{\sqrt{(\theta')^2+\sin^2\theta}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 29 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La identidad de Beltrami queda</p>
+  <p class="fragment eq-big">$$\boxed{\dfrac{\sin^2\theta}{\sqrt{(\theta')^2+\sin^2\theta}}=C}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 30 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo se sigue desde aquí?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Podríamos despejar $\theta'$ directamente, pero la forma más limpia es introducir una variable nueva: $u=\cot\theta$.</li>
+    <li class="fragment">La razón es que en la solución final aparecerá naturalmente una combinación trigonométrica lineal.</li>
+    <li class="fragment">Esta sustitución simplifica mucho el álgebra.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 31 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$u=\cot\theta$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\sin^2\theta=\frac{1}{1+u^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\theta'=\frac{d\theta}{d\phi}$$</div>
+    <div class="line fragment" data-fragment-index="3">$$u'=-\csc^2\theta\,\theta'=-\frac{\theta'}{\sin^2\theta}$$</div>
+    <div class="line fragment" data-fragment-index="4">$$\theta'=-u'\sin^2\theta=-\frac{u'}{1+u^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 32 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(\theta')^2=\frac{(u')^2}{(1+u^2)^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$(\theta')^2+\sin^2\theta=\frac{(u')^2}{(1+u^2)^2}+\frac{1}{1+u^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 33 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(\theta')^2+\sin^2\theta=\frac{(u')^2+(1+u^2)}{(1+u^2)^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\sqrt{(\theta')^2+\sin^2\theta}=\frac{\sqrt{(u')^2+u^2+1}}{1+u^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 34 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{\sin^2\theta}{\sqrt{(\theta')^2+\sin^2\theta}}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=\frac{1/(1+u^2)}{\sqrt{(u')^2+u^2+1}/(1+u^2)}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$=\frac{1}{\sqrt{(u')^2+u^2+1}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 35 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Entonces la ecuación de Beltrami queda</p>
+  <p class="fragment eq-big">$$\boxed{\dfrac{1}{\sqrt{(u')^2+u^2+1}}=C}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 36 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{1}{\sqrt{(u')^2+u^2+1}}=C$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\sqrt{(u')^2+u^2+1}=\frac{1}{C}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$(u')^2+u^2+1=\frac{1}{C^2}$$</div>
+    <div class="line fragment" data-fragment-index="3">$$(u')^2+u^2=A^2$$</div>
+    <div class="line fragment" data-fragment-index="4">donde $\;A^2=\dfrac{1}{C^2}-1$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 37 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo se resuelve $(u')^2+u^2=A^2$?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Esta ecuación ya tiene la estructura de una integral de movimiento.</li>
+    <li class="fragment">Pero como queremos una forma familiar, derivamos respecto de $\phi$.</li>
+    <li class="fragment">Eso nos llevará a una ecuación lineal de segundo orden.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 38 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(u')^2+u^2=A^2$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$2u'u''+2uu'=0$$</div>
+    <div class="line fragment" data-fragment-index="2">$$2u'(u''+u)=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 39 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Salvo casos triviales, podemos tomar</li>
+    <li class="fragment eq-only">$$u''+u=0$$</li>
+    <li class="fragment">Ésta es la ecuación del oscilador armónico simple en la variable $\phi$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 40 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$u''+u=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$u=A\cos(\phi-\phi_0)$$</div>
+    <div class="line fragment" data-fragment-index="2">o equivalentemente $\;u=A\cos\phi+B\sin\phi$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 41 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Recordando que $u=\cot\theta$, obtenemos</p>
+  <p class="fragment eq-big">$$\boxed{\cot\theta=A\cos(\phi-\phi_0)}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 42 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Ya terminamos?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">No.</li>
+    <li class="fragment">Hasta aquí solo obtuvimos la ecuación de la curva extrema en coordenadas esféricas.</li>
+    <li class="fragment">Falta la parte verdaderamente importante del problema:</li>
+    <li class="fragment">demostrar que esta curva es un círculo máximo.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 43 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Para interpretar geométricamente la solución, escribimos la esfera en coordenadas cartesianas:</li>
+    <li class="fragment eq-only">$X=a\sin\theta\cos\phi$</li>
+    <li class="fragment eq-only">$Y=a\sin\theta\sin\phi$</li>
+    <li class="fragment eq-only">$Z=a\cos\theta$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 44 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\cot\theta=A\cos(\phi-\phi_0)$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\cos(\phi-\phi_0)=\cos\phi\cos\phi_0+\sin\phi\sin\phi_0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\cot\theta=A(\cos\phi\cos\phi_0+\sin\phi\sin\phi_0)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 45 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">Multiplicamos por $\sin\theta$</div>
+    <div class="line fragment" data-fragment-index="1">$$\cos\theta=A\sin\theta(\cos\phi\cos\phi_0+\sin\phi\sin\phi_0)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">Multiplicamos además por $a$</div>
+    <div class="line fragment" data-fragment-index="3">$$a\cos\theta=Aa\sin\theta\cos\phi\cos\phi_0+Aa\sin\theta\sin\phi\sin\phi_0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 46 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$Z=AX\cos\phi_0+AY\sin\phi_0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$Z-AX\cos\phi_0-AY\sin\phi_0=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 47 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Ésta es la ecuación de un plano.</li>
+    <li class="fragment">Más aún, es un plano que pasa por el origen, porque no tiene término independiente.</li>
+    <li class="fragment">Entonces la curva hallada es la intersección:</li>
+    <li class="fragment">esfera + plano que pasa por el centro</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 48 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La intersección de una esfera con un plano que pasa por su centro es un círculo máximo.</p>
+  <p class="fragment">Por tanto</p>
+  <p class="fragment eq-big">$$\boxed{\text{las geodésicas de la esfera son círculos máximos}}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 49 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">Patrón aprendido en el problema 2:</li>
+    <li class="fragment">1. restringir correctamente la geometría</li>
+    <li class="fragment">2. construir el elemento de arco sobre la superficie</li>
+    <li class="fragment">3. usar Beltrami si el integrando no depende explícitamente de la variable independiente</li>
+    <li class="fragment">4. interpretar la solución, no solo resolverla</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 50 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 3</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Braquistócrona = cicloide</p>
+</div>
+
+<!-- ═══ SLIDE 51 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide este problema?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Pide mostrar que la curva de tiempo mínimo bajo gravedad es una cicloide.</li>
+    <li class="fragment">Además pide el caso con velocidad inicial no nula.</li>
+    <li class="fragment">En ambos casos lo esencial es la misma idea:</li>
+    <li class="fragment">minimizar el tiempo, no la longitud.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 52 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Elegimos coordenadas: $x$ horizontal, $y$ vertical positiva hacia abajo.</li>
+    <li class="fragment">Tomamos el punto inicial como $y=0$.</li>
+    <li class="fragment">Así la gravedad hace que la energía potencial disminuya al crecer $y$.</li>
+    <li class="fragment">Esta elección simplifica mucho el uso de energía.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 53 ═══ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Si la partícula parte del reposo, la conservación de la energía da $\;\dfrac{1}{2}mv^2=mgy$</li>
+    <li class="fragment">Luego $\;v=\sqrt{2gy}$</li>
+    <li class="fragment">El tiempo elemental es $\;dt=\dfrac{ds}{v}$</li>
+    <li class="fragment">y como $\;ds=\sqrt{1+y'^2}\,dx$</li>
+    <li class="fragment eq-only">$$dt=\frac{\sqrt{1+y'^2}}{\sqrt{2gy}}\,dx$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 54 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La funcional de tiempo es</p>
+  <p class="fragment eq-big">$$\boxed{T[y]=\int \frac{\sqrt{1+y'^2}}{\sqrt{2gy}}\,dx}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 55 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué patrón conviene usar aquí?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">El integrando no depende explícitamente de $x$.</li>
+    <li class="fragment">Entonces otra vez conviene usar Beltrami.</li>
+    <li class="fragment">Ésa es la puerta de entrada natural.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 56 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(y,y')=\frac{\sqrt{1+y'^2}}{\sqrt{2gy}}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial y'}=\frac{1}{\sqrt{2gy}}\frac{y'}{\sqrt{1+y'^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\Phi-y'\frac{\partial\Phi}{\partial y'}=\frac{\sqrt{1+y'^2}}{\sqrt{2gy}}-\frac{1}{\sqrt{2gy}}\frac{(y')^2}{\sqrt{1+y'^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 57 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi-y'\frac{\partial\Phi}{\partial y'}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=\frac{1+y'^2-(y')^2}{\sqrt{2gy}\sqrt{1+y'^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$=\frac{1}{\sqrt{2gy}\sqrt{1+y'^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 58 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La identidad de Beltrami da</p>
+  <p class="fragment eq-big">$$\boxed{\dfrac{1}{\sqrt{2gy}\sqrt{1+y'^2}}=C}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 59 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\sqrt{2gy}\sqrt{1+y'^2}=\frac{1}{C}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$2gy(1+y'^2)=\frac{1}{C^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 60 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Conviene absorber la constante definiendo un parámetro geométrico $a$ por $\;\dfrac{1}{C^2}=4ga$.</li>
+    <li class="fragment">Entonces la ecuación queda</li>
+    <li class="fragment eq-only">$$\boxed{y(1+y'^2)=2a}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 61 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y(1+y'^2)=2a$$</div>
+    <div class="line fragment" data-fragment-index="1">$$1+y'^2=\frac{2a}{y}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$y'^2=\frac{2a}{y}-1=\frac{2a-y}{y}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 62 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué sustitución sugiere esta forma?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">La combinación $(2a-y)/y$ sugiere una parametrización trigonométrica.</li>
+    <li class="fragment">La sustitución correcta es $\;y=a(1-\cos\psi)$</li>
+    <li class="fragment">porque entonces $\;2a-y=a(1+\cos\psi)$ y aparecen razones trigonométricas simples.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 63 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y=a(1-\cos\psi)$$</div>
+    <div class="line fragment" data-fragment-index="1">$$dy=a\sin\psi\,d\psi$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$2a-y=2a-a(1-\cos\psi)=a(1+\cos\psi)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 64 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y'^2=\frac{2a-y}{y}=\frac{1+\cos\psi}{1-\cos\psi}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$y'=\sqrt{\frac{1+\cos\psi}{1-\cos\psi}}=\cot\frac{\psi}{2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 65 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo obtenemos ahora $x(\psi)$?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Recordemos que $\;y'=\dfrac{dy}{dx}$, entonces $\;dx=\dfrac{dy}{y'}$.</li>
+    <li class="fragment">Ya tenemos $dy$ y $y'$ en términos de $\psi$.</li>
+    <li class="fragment">Solo falta sustituir y simplificar.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 66 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$dx=\frac{dy}{y'}=\frac{a\sin\psi\,d\psi}{\cot(\psi/2)}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$dx=a\sin\psi\tan(\psi/2)\,d\psi$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 67 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\sin\psi=2\sin(\psi/2)\cos(\psi/2)$$</div>
+    <div class="line fragment" data-fragment-index="1">$$\tan(\psi/2)=\frac{\sin(\psi/2)}{\cos(\psi/2)}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\sin\psi\tan(\psi/2)=2\sin^2(\psi/2)=1-\cos\psi$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 68 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$dx=a(1-\cos\psi)\,d\psi$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$x=a\int(1-\cos\psi)\,d\psi$$</div>
+    <div class="line fragment" data-fragment-index="2">$$x=a(\psi-\sin\psi)+C$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 69 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Si elegimos la cúspide inicial en el origen, cuando $\psi=0$ tenemos $x=0$ e $y=0$.</li>
+    <li class="fragment">Eso fija la constante en cero. Por tanto:</li>
+    <li class="fragment eq-only">$x=a(\psi-\sin\psi)$</li>
+    <li class="fragment eq-only">$y=a(1-\cos\psi)$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 70 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La solución es</p>
+  <p class="fragment eq-big">$$\boxed{x=a(\psi-\sin\psi),\qquad y=a(1-\cos\psi)}$$</p>
+  <p class="fragment">Ésta es la ecuación paramétrica de una <strong>cicloide</strong> con cúspide en el punto inicial.</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 71 ═══ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo cambia si la partícula tiene velocidad inicial $v_0$?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Ahora la energía no parte desde cero. La conservación da $\;\dfrac{1}{2}mv^2=\dfrac{1}{2}mv_0^2+mgy$.</li>
+    <li class="fragment">Entonces $\;v^2=v_0^2+2gy$.</li>
+    <li class="fragment">Conviene escribir $\;v_0^2=2gz$, de modo que $\;v^2=2g(y+z)$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 72 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La nueva funcional de tiempo queda</p>
+  <p class="fragment eq-big">$$\boxed{T[y]=\int \frac{\sqrt{1+y'^2}}{\sqrt{2g(y+z)}}\,dx}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 73 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(y,y')=\frac{\sqrt{1+y'^2}}{\sqrt{2g(y+z)}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\Phi-y'\frac{\partial\Phi}{\partial y'}=\frac{1}{\sqrt{2g(y+z)}\sqrt{1+y'^2}}=C$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 74 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$2g(y+z)(1+y'^2)=\frac{1}{C^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Definiendo de nuevo una constante $a$:</div>
+    <div class="line fragment" data-fragment-index="2">$$\boxed{(y+z)(1+y'^2)=2a}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 75 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Si definimos $\;Y=y+z$, la ecuación toma exactamente la misma forma que antes:</li>
+    <li class="fragment eq-only">$$Y(1+Y'^2)=2a$$</li>
+    <li class="fragment">Entonces la solución es otra vez una cicloide en la variable $Y$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 76 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La solución queda</p>
+  <p class="fragment">$Y=a(1-\cos\psi)$</p>
+  <p class="fragment">$x=a(\psi-\sin\psi)+C$</p>
+  <p class="fragment">es decir</p>
+  <p class="fragment eq-big">$$\boxed{y=a(1-\cos\psi)-z}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 77 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Las cúspides de la cicloide satisfacen $Y=0$. Como $Y=y+z$, eso significa $\;y=-z$.</li>
+    <li class="fragment">Es decir, la cicloide asociada tiene sus cúspides a una altura $z$ por encima del punto inicial.</li>
+    <li class="fragment">Y esa altura está fijada por</li>
+    <li class="fragment eq-only">$$\boxed{v_0^2=2gz}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 78 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">Patrón aprendido en el problema 3:</li>
+    <li class="fragment">cuando se minimiza tiempo bajo gravedad, la funcional sale de $\;dt=\dfrac{ds}{v}$ y la velocidad se obtiene por energía.</li>
+    <li class="fragment">El problema queda listo para Beltrami y una parametrización trigonométrica natural.</li>
+    <li class="fragment">La solución es una cicloide.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 79 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 4(a)</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Primera integral de Beltrami</p>
+</div>
+
+<!-- ═══ SLIDE 80 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide esta parte?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Considera una funcional $\;I=\displaystyle\int_{x_1}^{x_2}\Phi(y,y')\,dx$ donde $\Phi$ es independiente de $x$.</li>
+    <li class="fragment">Pide demostrar que Euler–Lagrange tiene una primera integral:</li>
+    <li class="fragment eq-only">$$\Phi-y'\frac{\partial\Phi}{\partial y'}=\text{constante}$$</li>
+    <li class="fragment">Esto es precisamente la identidad de Beltrami.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 81 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">Ecuación de Euler–Lagrange:</div>
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">Como $\Phi$ no depende explícitamente de $x$,</div>
+    <div class="line fragment" data-fragment-index="3">$$\Phi=\Phi(y,y')$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 82 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">Multiplicamos Euler–Lagrange por $y'$:</div>
+    <div class="line fragment" data-fragment-index="1">$$y'\frac{\partial\Phi}{\partial y}-y'\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">Derivada total de $\Phi$:</div>
+    <div class="line fragment" data-fragment-index="3">$$\frac{d\Phi}{dx}=\frac{\partial\Phi}{\partial y}y'+\frac{\partial\Phi}{\partial y'}y''$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 83 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{d}{dx}\!\left(y'\frac{\partial\Phi}{\partial y'}\right)=y''\frac{\partial\Phi}{\partial y'}+y'\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Restamos:</div>
+    <div class="line fragment" data-fragment-index="2">$$\frac{d\Phi}{dx}-\frac{d}{dx}\!\left(y'\frac{\partial\Phi}{\partial y'}\right)$$</div>
+    <div class="line fragment" data-fragment-index="3">$$=y'\!\left[\frac{\partial\Phi}{\partial y}-\frac{d}{dx}\!\left(\frac{\partial\Phi}{\partial y'}\right)\right]$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 84 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Por Euler–Lagrange, el corchete es cero. Entonces</p>
+  <p class="fragment eq-big">$$\boxed{\frac{d}{dx}\!\left(\Phi-y'\frac{\partial\Phi}{\partial y'}\right)=0}$$</p>
+  <p class="fragment">y por tanto</p>
+  <p class="fragment eq-big">$$\boxed{\Phi-y'\frac{\partial\Phi}{\partial y'}=\text{constante}}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 85 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 4(b)</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Catenaria mediante minimización de energía potencial con restricción</p>
+</div>
+
+<!-- ═══ SLIDE 86 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide exactamente esta parte?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Una cuerda flexible de longitud fija $l$ cuelga entre soportes de igual altura separados por $2x_0$.</li>
+    <li class="fragment">Hay que minimizar su energía potencial, pero la longitud está fijada.</li>
+    <li class="fragment">Por eso entra un multiplicador de Lagrange.</li>
+    <li class="fragment">Después hay que encontrar la forma explícita de la cuerda.</li>
+    <li class="fragment">Finalmente, para $l=4x_0$, hallar cuánto baja el centro respecto de la recta que une los soportes.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 87 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Tomamos el eje $x$ horizontal y el origen en el punto medio entre los soportes.</li>
+    <li class="fragment">La recta que une los soportes la tomamos como $y=0$.</li>
+    <li class="fragment">Entonces los soportes están en $x=\pm x_0$ y la cuerda cuelga por debajo.</li>
+    <li class="fragment">La densidad lineal de masa es uniforme.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 88 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">La energía potencial elemental es $\;dU=\rho g\,y\,ds$, donde $\rho$ es la masa por unidad de longitud.</li>
+    <li class="fragment">Como $\;ds=\sqrt{1+y'^2}\,dx$, resulta</li>
+    <li class="fragment eq-only">$$U[y]=\rho g\int y\sqrt{1+y'^2}\,dx$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 89 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">La restricción de longitud fija es $\;l=\int ds=\int \sqrt{1+y'^2}\,dx$.</li>
+    <li class="fragment">Como la longitud está fija, extremizamos</li>
+    <li class="fragment eq-only">$$J[y]=\int \left[\rho g\,y+\lambda\right]\sqrt{1+y'^2}\,dx$$</li>
+    <li class="fragment">donde $\lambda$ es el multiplicador de Lagrange.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 90 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">El factor $\rho g$ es constante. Podemos redefinir parámetros.</li>
+    <li class="fragment">La funcional efectiva puede escribirse como</li>
+    <li class="fragment eq-only">$$J[y]=\int (y+c)\sqrt{1+y'^2}\,dx$$</li>
+    <li class="fragment">donde $c$ es una constante asociada al multiplicador.</li>
+    <li class="fragment">El integrando no depende explícitamente de $x$. Luego conviene usar Beltrami.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 91 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi=(y+c)\sqrt{1+y'^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial y'}=(y+c)\frac{y'}{\sqrt{1+y'^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 92 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi-y'\frac{\partial\Phi}{\partial y'}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=(y+c)\sqrt{1+y'^2}-(y+c)\frac{(y')^2}{\sqrt{1+y'^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$=(y+c)\frac{1+y'^2-(y')^2}{\sqrt{1+y'^2}}$$</div>
+    <div class="line fragment" data-fragment-index="3">$$=\frac{y+c}{\sqrt{1+y'^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 93 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Beltrami da</p>
+  <p class="fragment eq-big">$$\boxed{\dfrac{y+c}{\sqrt{1+y'^2}}=a}$$</p>
+  <p class="fragment">donde $a$ es una constante.</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 94 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\sqrt{1+y'^2}=\frac{y+c}{a}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$1+y'^2=\frac{(y+c)^2}{a^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 95 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y'^2=\frac{(y+c)^2}{a^2}-1$$</div>
+    <div class="line fragment" data-fragment-index="1">$$y'=\frac{dy}{dx}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$\frac{dy}{dx}=\sqrt{\frac{(y+c)^2-a^2}{a^2}}$$</div>
+    <div class="line fragment" data-fragment-index="3">$$dx=\frac{a\,dy}{\sqrt{(y+c)^2-a^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 96 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué integral aparece?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Aparece la integral estándar $\;\displaystyle\int \dfrac{dy}{\sqrt{(y+c)^2-a^2}}$</li>
+    <li class="fragment">cuya primitiva es una función hiperbólica inversa.</li>
+    <li class="fragment">Eso ya sugiere que la solución será una catenaria.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 97 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\int \frac{dy}{\sqrt{(y+c)^2-a^2}}=\frac{x-b}{a}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\operatorname{arcosh}\!\left(\frac{y+c}{a}\right)=\frac{x-b}{a}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 98 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\frac{y+c}{a}=\cosh\!\left(\frac{x-b}{a}\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\boxed{y(x)=a\cosh\!\left(\frac{x-b}{a}\right)-c}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 99 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Como los soportes están a igual altura y el sistema es simétrico respecto del punto medio, la curva debe ser par.</li>
+    <li class="fragment">Entonces el vértice está en $x=0$.</li>
+    <li class="fragment">Eso fuerza $\;b=0$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 100 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La solución simétrica queda</p>
+  <p class="fragment eq-big">$$\boxed{y(x)=a\cosh\!\left(\frac{x}{a}\right)-c}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 101 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo se fija $c$?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Porque los soportes están sobre la recta $y=0$ en $x=\pm x_0$.</li>
+    <li class="fragment">Entonces $\;y(\pm x_0)=0$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 102 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$0=a\cosh\!\left(\frac{x_0}{a}\right)-c$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$c=a\cosh\!\left(\frac{x_0}{a}\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 103 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La forma explícita de la cuerda es</p>
+  <p class="fragment eq-big">$$\boxed{y(x)=a\cosh\!\left(\frac{x}{a}\right)-a\cosh\!\left(\frac{x_0}{a}\right)}$$</p>
+  <p class="fragment">Esta función es negativa en el centro, como corresponde a una cuerda que cuelga bajo la línea de soporte.</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 104 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Cómo entra la longitud total?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Falta usar la restricción $l$.</li>
+    <li class="fragment">Para eso calculamos el elemento de longitud con la solución encontrada.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 105 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y'(x)=\sinh\!\left(\frac{x}{a}\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\sqrt{1+y'^2}=\sqrt{1+\sinh^2\!\left(\frac{x}{a}\right)}=\cosh\!\left(\frac{x}{a}\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 106 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$l=\int_{-x_0}^{x_0}\sqrt{1+y'^2}\,dx$$</div>
+    <div class="line fragment" data-fragment-index="1">$$l=\int_{-x_0}^{x_0}\cosh\!\left(\frac{x}{a}\right)dx$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$l=2\int_0^{x_0}\cosh\!\left(\frac{x}{a}\right)dx$$</div>
+    <div class="line fragment" data-fragment-index="3">$$l=2a\sinh\!\left(\frac{x_0}{a}\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 107 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La relación entre $l$, $x_0$ y $a$ es</p>
+  <p class="fragment eq-big">$$\boxed{l=2a\sinh\!\left(\frac{x_0}{a}\right)}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 108 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Ahora imponemos $\;l=4x_0$. Entonces</li>
+    <li class="fragment eq-only">$$2a\sinh\!\left(\frac{x_0}{a}\right)=4x_0$$</li>
+    <li class="fragment">Dividiendo por $2a$:</li>
+    <li class="fragment eq-only">$$\sinh\!\left(\frac{x_0}{a}\right)=2\frac{x_0}{a}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 109 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Definimos $\;u=\dfrac{x_0}{a}$.</li>
+    <li class="fragment">Entonces la ecuación queda</li>
+    <li class="fragment eq-only">$$\boxed{\sinh u=2u}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 110 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Esta ecuación no se resuelve en forma elemental.</li>
+    <li class="fragment">Se resuelve numéricamente.</li>
+    <li class="fragment">La raíz positiva no trivial es</li>
+    <li class="fragment eq-only">$u\approx 2.177318985$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 111 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué cantidad pide el problema al final?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Pide cuánto baja el centro de la cuerda respecto de la línea que une los soportes.</li>
+    <li class="fragment">Esa distancia es $\;d=-y(0)$.</li>
+    <li class="fragment">porque la línea de soportes es $y=0$ y en el centro la cuerda está bajo ella.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 112 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$y(0)=a-a\cosh\!\left(\frac{x_0}{a}\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$d=-y(0)=a\left[\cosh\!\left(\frac{x_0}{a}\right)-1\right]$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 113 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$d=a(\cosh u-1)$$</div>
+    <div class="line fragment" data-fragment-index="1">Como $\;a=\dfrac{x_0}{u}$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$d=\frac{x_0}{u}(\cosh u-1)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 114 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Sustituyendo $u\approx 2.177318985$:</p>
+  <p class="fragment">$d\approx 1.592776712\,x_0$</p>
+  <p class="fragment">Por tanto</p>
+  <p class="fragment eq-big">$$\boxed{d\approx 1.593\,x_0}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 115 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">Patrón aprendido en el problema 4:</li>
+    <li class="fragment">una restricción integral se incorpora con multiplicador de Lagrange,</li>
+    <li class="fragment">el integrando sigue sin depender explícitamente de $x$,</li>
+    <li class="fragment">entonces Beltrami vuelve a ser la herramienta central,</li>
+    <li class="fragment">y la solución natural es hiperbólica:</li>
+    <li class="fragment eq-only">$$\boxed{\text{la cuerda adopta una catenaria}}$$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 116 ═══ -->
+<div class="slide slide-portada future">
+  <h1 class="titulo">Problema 5</h1>
+  <div class="sep"></div>
+  <p class="subtitulo">Principio de Fermat y rayos en una atmósfera con índice radial</p>
+</div>
+
+<!-- ═══ SLIDE 117 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide exactamente este problema?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Hay tres cosas:</li>
+    <li class="fragment">1. escribir el principio de Fermat en forma integral</li>
+    <li class="fragment">2. derivar la ecuación del rayo $\;\dfrac{dr}{d\phi}=r\sqrt{k n^2 r^2-1}$</li>
+    <li class="fragment">3. si $n\propto r^m$, hallar el valor de $m$ para que un rayo tangencial pueda permanecer a radio constante para cualquier $r$</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 118 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Como el índice de refracción depende solo de la distancia al centro, $n=n(r)$, la simetría es central.</li>
+    <li class="fragment">El rayo queda contenido en un plano.</li>
+    <li class="fragment">Entonces conviene trabajar en coordenadas polares planas $(r,\phi)$ dentro de ese plano.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 119 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">En óptica geométrica, el tiempo de tránsito es $\;t=\dfrac{1}{c}\displaystyle\int n\,ds$</li>
+    <li class="fragment">y el principio de Fermat dice que ese tiempo es estacionario respecto de pequeñas variaciones del camino.</li>
+    <li class="fragment">Por tanto la funcional es $\;I=\displaystyle\int n(r)\,ds$</li>
+    <li class="fragment">(ignorando el factor constante $1/c$, que no cambia la ecuación extremal).</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 120 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$ds^2=dr^2+r^2d\phi^2$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Si usamos $\phi$ como parámetro,</div>
+    <div class="line fragment" data-fragment-index="2">$$dr=r'\,d\phi,\qquad r'=\frac{dr}{d\phi}$$</div>
+    <div class="line fragment" data-fragment-index="3">$$ds=\sqrt{(r')^2+r^2}\,d\phi$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 121 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La funcional de Fermat queda</p>
+  <p class="fragment eq-big">$$\boxed{I[r]=\int n(r)\sqrt{(r')^2+r^2}\,d\phi}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 122 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué patrón conviene usar?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">El integrando no depende explícitamente de $\phi$.</li>
+    <li class="fragment">Entonces otra vez usamos Beltrami.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 123 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(r,r')=n(r)\sqrt{(r')^2+r^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial r'}=n(r)\frac{r'}{\sqrt{(r')^2+r^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 124 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi-r'\frac{\partial\Phi}{\partial r'}$$</div>
+    <div class="line fragment" data-fragment-index="1">$$=n(r)\sqrt{(r')^2+r^2}-n(r)\frac{(r')^2}{\sqrt{(r')^2+r^2}}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$=n(r)\frac{r^2}{\sqrt{(r')^2+r^2}}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 125 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Beltrami da</p>
+  <p class="fragment eq-big">$$\boxed{\dfrac{n(r)\,r^2}{\sqrt{(r')^2+r^2}}=C}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 126 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\sqrt{(r')^2+r^2}=\frac{n(r)r^2}{C}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$(r')^2+r^2=\frac{n^2(r)r^4}{C^2}$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 127 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$(r')^2=r^2\!\left(\frac{n^2(r)r^2}{C^2}-1\right)$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Si definimos $k=\dfrac{1}{C^2}$,</div>
+    <div class="line fragment" data-fragment-index="2">$$(r')^2=r^2\!\left(k\,n^2(r)r^2-1\right)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 128 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Entonces</p>
+  <p class="fragment eq-big">$$\boxed{\frac{dr}{d\phi}=r\sqrt{k\,n^2 r^2-1}}$$</p>
+  <p class="fragment">que es justamente la ecuación pedida.</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 129 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <div class="pregunta-box"><p>¿Qué pide la última parte?</p></div>
+  <ul class="teoria-list">
+    <li class="fragment">Supongamos que $\;n(r)=A r^m$.</li>
+    <li class="fragment">El problema pide el valor de $m$ tal que un rayo inicialmente tangencial permanezca a distancia constante del centro, para cualquier radio.</li>
+    <li class="fragment">Eso significa: queremos una órbita circular óptica, $\;r=r_0=\text{constante}$.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 130 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Si uno usa solo la primera integral $(dr/d\phi)=0$, obtiene una relación entre $k$ y $r_0$.</li>
+    <li class="fragment">Pero para garantizar que $r=r_0$ sea una solución para cualquier radio, hay que imponer la ecuación variacional directamente.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 131 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(r,r')=n(r)\sqrt{(r')^2+r^2}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">Euler–Lagrange:</div>
+    <div class="line fragment" data-fragment-index="2">$$\frac{\partial\Phi}{\partial r}-\frac{d}{d\phi}\!\left(\frac{\partial\Phi}{\partial r'}\right)=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 132 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">Consideremos una solución circular:</div>
+    <div class="line fragment" data-fragment-index="1">$$r=r_0=\text{cte}$$</div>
+    <div class="line fragment" data-fragment-index="2">$$r'=0$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="3">Entonces</div>
+    <div class="line fragment" data-fragment-index="4">$$\frac{\partial\Phi}{\partial r}=0$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 133 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$\Phi(r,0)=n(r)\,r$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="1">$$\frac{\partial\Phi}{\partial r}=n'(r)\,r+n(r)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 134 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">La condición para una órbita de radio constante es</p>
+  <p class="fragment eq-big">$$\boxed{r\,n'(r)+n(r)=0}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 135 ═══ -->
+<div class="slide slide-calculo future">
+<div class="inner">
+  <div class="col">
+    <div class="line fragment" data-fragment-index="0">$$n(r)=A r^m$$</div>
+    <div class="line fragment" data-fragment-index="1">$$n'(r)=Am\,r^{m-1}$$</div>
+  </div>
+  <div class="col-divider"></div>
+  <div class="col">
+    <div class="line fragment" data-fragment-index="2">$$r\,n'(r)+n(r)=Am\,r^m+A\,r^m$$</div>
+    <div class="line fragment" data-fragment-index="3">$$=A\,r^m(m+1)$$</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 136 ═══ -->
+<div class="slide slide-conclusion future">
+<div class="inner">
+  <p class="fragment">Para que esto sea cero para cualquier $r$:</p>
+  <p class="fragment">$A\,r^m(m+1)=0$</p>
+  <p class="fragment">luego</p>
+  <p class="fragment eq-big">$$\boxed{m=-1}$$</p>
+</div>
+</div>
+
+<!-- ═══ SLIDE 137 ═══ -->
+<div class="slide slide-teoria future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">El índice debe comportarse como $\;n(r)\propto \dfrac{1}{r}$</li>
+    <li class="fragment">para que exista un rayo tangencial que permanezca a radio constante, cualquiera sea ese radio inicial.</li>
+    <li class="fragment">Ésta es la condición de equilibrio óptico circular.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 138 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">Patrón aprendido en el problema 5:</li>
+    <li class="fragment">el principio de Fermat se traduce en una funcional exactamente igual en estructura a los otros problemas.</li>
+    <li class="fragment">Como el integrando no depende explícitamente de $\phi$, Beltrami vuelve a ser la vía natural.</li>
+    <li class="fragment">La ecuación del rayo sale casi de inmediato una vez elegida la parametrización correcta.</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 139 ═══ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">Problema 1: longitud en el espacio $\;\to\;$ recta</li>
+    <li class="fragment">Problema 2: longitud sobre una esfera $\;\to\;$ círculo máximo</li>
+    <li class="fragment">Problema 3: tiempo mínimo bajo gravedad $\;\to\;$ cicloide</li>
+    <li class="fragment">Problema 4: restricción de longitud + energía potencial $\;\to\;$ catenaria</li>
+    <li class="fragment">Problema 5: Fermat con índice radial $\;\to\;$ ecuación del rayo</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 140 ═══ -->
+<div class="slide slide-teoria slide-compact future">
+<div class="inner">
+  <ul class="teoria-list">
+    <li class="fragment">El patrón general que deben reconocer es:</li>
+    <li class="fragment">1. identificar el elemento geométrico o físico: $ds$, $dt$, energía, etc.</li>
+    <li class="fragment">2. construir la funcional</li>
+    <li class="fragment">3. mirar si conviene Euler–Lagrange directa o Beltrami</li>
+    <li class="fragment">4. elegir una sustitución inteligente</li>
+    <li class="fragment">5. interpretar geométricamente el resultado</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══ SLIDE 141 ═══ -->
+<div class="slide slide-cierre future">
+<div class="inner" style="width:100%;max-width:880px;">
+  <ul class="teoria-list">
+    <li class="fragment">En estos cinco problemas, lo esencial no es memorizar curvas famosas.</li>
+    <li class="fragment">Lo esencial es reconocer cómo una cantidad global asociada a una curva produce, al extremizarse, una ecuación diferencial concreta.</li>
+    <li class="fragment">Esa es la idea que luego pasa, casi sin cambiar, a la acción y a las ecuaciones de Euler–Lagrange en mecánica.</li>
+  </ul>
+</div>
+</div>
+
+</div><!-- /slides-container -->
+
+<div class="nav-overlay">
+  <div class="slide-counter"><span id="cur">1</span>&thinsp;/&thinsp;141</div>
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="prev()">&#8592;</button>
+    <button class="nav-btn" onclick="next()">&#8594;</button>
+  </div>
+</div>
+<div class="progress-bar" id="pb"></div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+let cur = 0;
+
+function getFragments(sl) {
+  const frags = Array.from(sl.querySelectorAll('.fragment'));
+  frags.sort((a, b) => {
+    const ia = a.dataset.fragmentIndex !== undefined ? parseInt(a.dataset.fragmentIndex) : 9999;
+    const ib = b.dataset.fragmentIndex !== undefined ? parseInt(b.dataset.fragmentIndex) : 9999;
+    return ia - ib;
+  });
+  return frags;
+}
+
+function updateUI() {
+  slides.forEach((s, i) => {
+    s.classList.remove('past', 'present', 'future');
+    if (i < cur) s.classList.add('past');
+    else if (i === cur) s.classList.add('present');
+    else s.classList.add('future');
+  });
+  document.getElementById('cur').textContent = cur + 1;
+  const pct = cur === 0 ? 0 : (cur / (slides.length - 1)) * 100;
+  document.getElementById('pb').style.width = pct + '%';
+}
+
+function next() {
+  const sl = slides[cur];
+  const frags = getFragments(sl);
+  const nxt = frags.find(f => !f.classList.contains('visible'));
+  if (nxt) {
+    nxt.classList.add('visible');
+  } else if (cur < slides.length - 1) {
+    cur++;
+    updateUI();
+  }
+}
+
+function prev() {
+  const sl = slides[cur];
+  const frags = getFragments(sl);
+  const vis = frags.filter(f => f.classList.contains('visible'));
+  if (vis.length > 0) {
+    vis[vis.length - 1].classList.remove('visible');
+  } else if (cur > 0) {
+    cur--;
+    updateUI();
+    getFragments(slides[cur]).forEach(f => f.classList.add('visible'));
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
+  if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); prev(); }
+});
+
+function initPresentation() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '$',  right: '$',  display: false }
+    ],
+    throwOnError: false
+  });
+  updateUI();
+}
+</script>
+</body>
+</html>

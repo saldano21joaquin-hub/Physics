@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braquistócrona: Curva de Tiempo Mínimo</title>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 50px 110px 50px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f5f1e8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 95px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .portada {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 25px;
+        }
+
+        .portada-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .portada-subtitle {
+            font-size: 1.7rem;
+            color: #5a5a5a;
+            margin-top: 10px;
+            line-height: 1.3;
+        }
+
+        .portada-divider {
+            width: 250px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #e0a456, transparent);
+            margin: 20px 0;
+        }
+
+        .portada-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #6a6a6a;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .slide-title.section {
+            font-size: 2rem;
+            color: #e0a456;
+        }
+
+        .content-text {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            line-height: 1.7;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .content-list {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+            line-height: 1.85;
+        }
+
+        .content-list li {
+            margin-bottom: 12px;
+        }
+
+        .math-block {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(224, 160, 86, 0.05);
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex: 1;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .column-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e0a456;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .column-content {
+            font-size: 1.15rem;
+            color: #2c2c2c;
+            line-height: 1.9;
+        }
+
+        .equation-line {
+            margin: 12px 0;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fragment {
+            opacity: 0;
+        }
+
+        .fragment.visible {
+            opacity: 1;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            font-size: 0.95rem;
+            color: #888888;
+            z-index: 10;
+            min-height: 70px;
+            border-top: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-left {
+            text-align: left;
+            flex: 1;
+            padding-right: 20px;
+            word-wrap: break-word;
+        }
+
+        .footer-center {
+            text-align: center;
+            flex: 1;
+            padding: 0 20px;
+            word-wrap: break-word;
+        }
+
+        .footer-right {
+            text-align: right;
+            flex: 1;
+            padding-left: 20px;
+            word-wrap: break-word;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e0e0e0;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #2c2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #f5f1e8;
+            border-color: #e0a456;
+            color: #e0a456;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.95rem;
+            color: #8a8a8a;
+            z-index: 100;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            color: #2c2c2c;
+        }
+
+        strong {
+            color: #e0a456;
+            font-weight: 700;
+        }
+
+        em {
+            color: #e0a456;
+            font-style: italic;
+        }
+
+        .boxed {
+            border: 2px solid #e0a456;
+            padding: 15px 25px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 20px 0;
+            background: rgba(224, 160, 86, 0.08);
+        }
+
+        .highlight {
+            background: rgba(224, 160, 86, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #e0a456;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+
+        <!-- SLIDE 1: Portada -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="portada">
+                    <div class="portada-title">Problema 3: La Braquistócrona</div>
+                    <div class="portada-subtitle">La Curva de Tiempo Mínimo bajo Gravedad</div>
+                    <div class="portada-divider"></div>
+                    <div class="portada-info">
+                        <div style="font-size: 1.1rem; color: #6a6a6a;">
+                            Demostración completa de que la trayectoria que minimiza el tiempo de descenso es una <strong>cicloide</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Conexión con la teoría -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title section">Conexión con la Teoría</h1>
+                <ul class="content-list">
+                    <li>Este problema es una <strong>aplicación directa</strong> de los conceptos vistos en la Ayudantía 1:</li>
+                    <li style="margin-left: 30px;">✓ Definición de funcionales</li>
+                    <li style="margin-left: 30px;">✓ Extremización de integrales</li>
+                    <li style="margin-left: 30px;">✓ Primera integral de Beltrami (mejor que Euler-Lagrange aquí)</li>
+                    <li style="margin-left: 30px;">✓ Ecuaciones diferenciales de primer orden</li>
+                    <li style="margin-left: 30px;">✓ Parametrización e integración</li>
+                    <li>La braquistócrona es el problema histórico que <strong>motivó el desarrollo del cálculo variacional</strong> en los siglos XVII-XVIII.</li>
+                    <li>Fue propuesto por Johann Bernoulli en 1696 como desafío a los matemáticos europeos.</li>
+                </ul>
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="../ayudantia1-variacional-euler-lagrange/index.html" style="display: inline-block; padding: 10px 20px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 1.1rem; transition: all 0.3s;">
+                        ← Volver a Ayudantía 1
+                    </a>
+                </p>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Enunciado del Problema -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Enunciado del Problema 3</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto; background: rgba(224, 160, 86, 0.1); padding: 20px; border-left: 4px solid #e0a456; border-radius: 4px; font-size: 1.05rem; line-height: 1.8;">
+                    Muestre que la solución al problema de la braquistócrona corresponde a una cicloide con una cúspide en el punto inicial en el cual se suelta la partícula. Demostrar también que si la partícula se proyecta con una energía cinética inicial $\tfrac{1}{2}mv_0^2$, la braquistócrona sigue siendo una cicloide que pasa por los dos puntos que tienen una cúspide a una altura $z$ sobre el punto inicial dada por $v_0^2 = 2gz$.
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Planteamiento del Problema</h1>
+                <ul class="content-list">
+                    <li>Queremos encontrar una curva entre dos puntos $A$ y $B$ tales que una partícula sin rozamiento, bajo la acción de la gravedad, <strong>tarda el menor tiempo</strong> en viajar de $A$ a $B$.</li>
+                    <li>La cantidad a minimizar NO es la longitud del camino (eso sería una recta).</li>
+                    <li>Es el <strong>tiempo de tránsito</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$T = \int dt$$</li>
+                    <li>Como $dt = \dfrac{ds}{v}$, necesitamos expresar tanto el elemento de arco $ds$ como la rapidez $v$ en términos de la curva $y(x)$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Sistema de Coordenadas</h1>
+                <ul class="content-list">
+                    <li>Usamos un sistema de ejes en el plano vertical:</li>
+                    <li style="margin-left: 30px;"><strong>Eje $x$:</strong> horizontal (hacia la derecha)</li>
+                    <li style="margin-left: 30px;"><strong>Eje $y$:</strong> vertical <strong>positiva hacia abajo</strong></li>
+                    <li>Esta elección es crucial porque:</li>
+                    <li style="margin-left: 30px;">• La gravedad hace crecer $y$</li>
+                    <li style="margin-left: 30px;">• La energía potencial disminuye cuando $y$ aumenta</li>
+                    <li style="margin-left: 30px;">• Las expresiones resultan más simples</li>
+                    <li>Sea $y = y(x)$ la curva buscada, con dos puntos fijos $A$ y $B$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Elemento de Arco</h1>
+                <ul class="content-list">
+                    <li>Para una curva plana $y(x)$ en el plano $(x,y)$, el elemento de arco infinitesimal cumple:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = dx^2 + dy^2$$</li>
+                    <li>Como $dy = y'(x) \, dx$, tenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = dx^2 + \big(y'(x) \, dx\big)^2$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = dx^2 + (y')^2 dx^2$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = \left(1 + (y')^2\right) dx^2$$</li>
+                    <li>Tomando la raíz cuadrada:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$ds = \sqrt{1 + (y')^2} \, dx$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Caso 1: Partícula que parte del reposo</h1>
+                <ul class="content-list">
+                    <li>Supongamos que la partícula se suelta desde el punto inicial $A$ con $y_A = 0$.</li>
+                    <li>No hay rozamiento, así que <strong>la energía mecánica se conserva</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$E_{\text{total}} = K + U = \text{constante}$$</li>
+                    <li>Al inicio en $A$: $K_A = 0$ (parte del reposo) y tomamos $U_A = 0$ (origen de potencial).</li>
+                    <li>En cualquier punto con coordenada $y > 0$ (más abajo):</li>
+                    <li style="text-align: center; margin-left: -50px;">$$0 + 0 = \frac{1}{2}mv^2 - mgy$$</li>
+                    <li>Despejando $v$:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$v = \sqrt{2gy}$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Construcción de la Funcional de Tiempo</h1>
+                <ul class="content-list">
+                    <li>Ahora expresamos el tiempo infinitesimal $dt$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dt = \frac{ds}{v}$$</li>
+                    <li>Sustituyendo $ds = \sqrt{1 + (y')^2} \, dx$ y $v = \sqrt{2gy}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dt = \frac{\sqrt{1 + (y')^2} \, dx}{\sqrt{2gy}}$$</li>
+                    <li>El tiempo total para ir de $A$ (en $x_1$) a $B$ (en $x_2$) es:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$T[y] = \int_{x_1}^{x_2} \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}} \, dx$$</span></li>
+                    <li>El integrando es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(y, y') = \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Observación Crucial sobre $\Phi$</h1>
+                <ul class="content-list">
+                    <li>El integrando es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(y, y') = \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}}$$</li>
+                    <li>Notemos que <strong>$\Phi$ depende solo de $y$ e $y'$, NO depende explícitamente de $x$</strong>.</li>
+                    <li>Esto es una propiedad especial. Cuando ocurre:</li>
+                    <li style="margin-left: 30px;">$$\Phi = \Phi(y, y') \quad \text{(sin } x \text{ explícita)}$$</li>
+                    <li>podemos usar una herramienta más simple que Euler-Lagrange completa:</li>
+                    <li style="text-align: center; margin-left: -50px;">la <strong>primera integral de Beltrami</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Primera Integral de Beltrami</h1>
+                <ul class="content-list">
+                    <li>Si una funcional tiene la forma:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I = \int \Phi(y, y') \, dx$$</li>
+                    <li>sin dependencia explícita en $x$, entonces la extremal cumple:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\Phi - y' \frac{\partial \Phi}{\partial y'} = C \quad \text{(constante)}$$</span></li>
+                    <li>Esta identidad se deduce de Euler-Lagrange, pero es más directa en este caso.</li>
+                    <li>Es el equivalente a la "energía se conserva" en mecánica.</li>
+                    <li>Para nuestro problema, aplicaremos esta identidad con:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(y, y') = \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Cálculo de $\frac{\partial \Phi}{\partial y'}$</h1>
+                <ul class="content-list">
+                    <li>Escribimos $\Phi$ explícitamente:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi = \frac{1}{\sqrt{2gy}} \sqrt{1 + (y')^2}$$</li>
+                    <li>Al derivar respecto de $y'$, el factor $\dfrac{1}{\sqrt{2gy}}$ es una constante (porque $y$ no cambia al variar $y'$):</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial y'} = \frac{1}{\sqrt{2gy}} \frac{\partial}{\partial y'} \sqrt{1 + (y')^2}$$</li>
+                    <li>Ahora derivamos $\sqrt{1 + (y')^2}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{dy'} \sqrt{1 + (y')^2} = \frac{1}{2\sqrt{1 + (y')^2}} \cdot 2y' = \frac{y'}{\sqrt{1 + (y')^2}}$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{\partial \Phi}{\partial y'} = \frac{1}{\sqrt{2gy}} \cdot \frac{y'}{\sqrt{1 + (y')^2}}$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Aplicación de Beltrami: Primer término</h1>
+                <ul class="content-list">
+                    <li>Calculamos el término $y' \dfrac{\partial \Phi}{\partial y'}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y' \frac{\partial \Phi}{\partial y'} = y' \cdot \frac{1}{\sqrt{2gy}} \cdot \frac{y'}{\sqrt{1 + (y')^2}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{y' \cdot y'}{\sqrt{2gy} \cdot \sqrt{1 + (y')^2}}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{(y')^2}{\sqrt{2gy} \sqrt{1 + (y')^2}}$$</li>
+                    <li>Ahora formamos la combinación de Beltrami:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi - y' \frac{\partial \Phi}{\partial y'}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}} - \frac{(y')^2}{\sqrt{2gy} \sqrt{1 + (y')^2}}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Aplicación de Beltrami: Simplificación</h1>
+                <ul class="content-list">
+                    <li>Sacamos factor común $\dfrac{1}{\sqrt{2gy}}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi - y' \frac{\partial \Phi}{\partial y'} = \frac{1}{\sqrt{2gy}} \left[ \sqrt{1 + (y')^2} - \frac{(y')^2}{\sqrt{1 + (y')^2}} \right]$$</li>
+                    <li>Llevamos a denominador común el corchete:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{1}{\sqrt{2gy}} \left[ \frac{1 + (y')^2 - (y')^2}{\sqrt{1 + (y')^2}} \right]$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{1}{\sqrt{2gy}} \cdot \frac{1}{\sqrt{1 + (y')^2}}$$</li>
+                    <li>Por la identidad de Beltrami, esto debe ser constante:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{1}{\sqrt{2gy} \sqrt{1 + (y')^2}} = C$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Reordenamiento Algebraico I</h1>
+                <ul class="content-list">
+                    <li>De la identidad de Beltrami:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{1}{\sqrt{2gy} \sqrt{1 + (y')^2}} = C$$</li>
+                    <li>Invertimos ambos lados:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sqrt{2gy} \sqrt{1 + (y')^2} = \frac{1}{C}$$</li>
+                    <li>Elevamos al cuadrado:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2gy \left(1 + (y')^2\right) = \frac{1}{C^2}$$</li>
+                    <li>Definimos una nueva constante $a$ tal que:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{1}{C^2} = 4ga$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2gy \left(1 + (y')^2\right) = 4ga$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Reordenamiento Algebraico II</h1>
+                <ul class="content-list">
+                    <li>Tenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2gy \left(1 + (y')^2\right) = 4ga$$</li>
+                    <li>Dividimos ambos lados por $2g$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y \left(1 + (y')^2\right) = 2a$$</li>
+                    <li>Esta es la ecuación diferencial de primer orden que caracteriza a la braquistócrona:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$y \left(1 + (y')^2\right) = 2a$$</span></li>
+                    <li>Reescribiendo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$1 + (y')^2 = \frac{2a}{y}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(y')^2 = \frac{2a}{y} - 1 = \frac{2a - y}{y}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Parametrización Trigonométrica I</h1>
+                <ul class="content-list">
+                    <li>Para resolver $(y')^2 = \dfrac{2a - y}{y}$, hacemos una sustitución inteligente.</li>
+                    <li>La forma $\dfrac{2a - y}{y}$ sugiere una parametrización trigonométrica.</li>
+                    <li>Introducimos un parámetro $\psi$ y escribimos:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$y = a(1 - \cos\psi)$$</span></li>
+                    <li>Veamos por qué funciona. Si $y = a(1 - \cos\psi)$, entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$2a - y = 2a - a(1 - \cos\psi)$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= 2a - a + a\cos\psi$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= a(1 + \cos\psi)$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Parametrización Trigonométrica II</h1>
+                <ul class="content-list">
+                    <li>Con $y = a(1 - \cos\psi)$ y $2a - y = a(1 + \cos\psi)$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{2a - y}{y} = \frac{a(1 + \cos\psi)}{a(1 - \cos\psi)} = \frac{1 + \cos\psi}{1 - \cos\psi}$$</li>
+                    <li>Usando identidades trigonométricas:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$1 + \cos\psi = 2\cos^2\frac{\psi}{2}, \qquad 1 - \cos\psi = 2\sin^2\frac{\psi}{2}$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(y')^2 = \frac{2\cos^2(\psi/2)}{2\sin^2(\psi/2)} = \cot^2\frac{\psi}{2}$$</li>
+                    <li>Tomamos la rama positiva (la partícula desciende):</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$y' = \cot\frac{\psi}{2}$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Cálculo de $x(\psi)$: Relación $dx$</h1>
+                <ul class="content-list">
+                    <li>Ahora necesitamos encontrar $x$ como función de $\psi$.</li>
+                    <li>Sabemos que $y = a(1 - \cos\psi)$. Derivamos respecto de $\psi$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{dy}{d\psi} = a \sin\psi$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dy = a\sin\psi \, d\psi$$</li>
+                    <li>Como $y' = \dfrac{dy}{dx}$, despejamos $dx$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dx = \frac{dy}{y'} = \frac{a\sin\psi \, d\psi}{\cot(\psi/2)}$$</li>
+                    <li>Como $\dfrac{1}{\cot(\psi/2)} = \tan(\psi/2)$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dx = a\sin\psi \, \tan\frac{\psi}{2} \, d\psi$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Simplificación Trigonométrica I</h1>
+                <ul class="content-list">
+                    <li>Necesitamos simplificar $\sin\psi \, \tan(\psi/2)$.</li>
+                    <li>Usamos:</li>
+                    <li style="margin-left: 30px;">$$\sin\psi = 2\sin\frac{\psi}{2}\cos\frac{\psi}{2}$$</li>
+                    <li style="margin-left: 30px;">$$\tan\frac{\psi}{2} = \frac{\sin(\psi/2)}{\cos(\psi/2)}$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin\psi \, \tan\frac{\psi}{2} = 2\sin\frac{\psi}{2}\cos\frac{\psi}{2} \cdot \frac{\sin(\psi/2)}{\cos(\psi/2)}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= 2\sin\frac{\psi}{2} \cdot \frac{\sin(\psi/2) \cdot \cos(\psi/2)}{\cos(\psi/2)}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= 2\sin\frac{\psi}{2} \cdot \sin\frac{\psi}{2}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= 2\sin^2\frac{\psi}{2}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Simplificación Trigonométrica II</h1>
+                <ul class="content-list">
+                    <li>Tenemos $\sin\psi \, \tan(\psi/2) = 2\sin^2(\psi/2)$.</li>
+                    <li>Ahora usamos la identidad de ángulo doble:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$1 - \cos\psi = 2\sin^2\frac{\psi}{2}$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sin\psi \, \tan\frac{\psi}{2} = 1 - \cos\psi$$</li>
+                    <li>Así, nuestra expresión para $dx$ se simplifica a:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dx = a(1 - \cos\psi) \, d\psi$$</li>
+                    <li>Pero nota que $(1 - \cos\psi) = \dfrac{y}{a}$, así que podríamos escribir:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dx = y \, d\psi$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Integración para obtener $x(\psi)$</h1>
+                <ul class="content-list">
+                    <li>Tenemos $dx = a(1 - \cos\psi) \, d\psi$. Integramos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x = \int a(1 - \cos\psi) \, d\psi$$</li>
+                    <li>Separamos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x = a \int (1 - \cos\psi) \, d\psi$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= a \int 1 \, d\psi - a \int \cos\psi \, d\psi$$</li>
+                    <li>Integramos cada término:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\int 1 \, d\psi = \psi, \qquad \int \cos\psi \, d\psi = \sin\psi$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x = a\psi - a\sin\psi + C = a(\psi - \sin\psi) + C$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Determinación de la Constante de Integración</h1>
+                <ul class="content-list">
+                    <li>Tenemos $x = a(\psi - \sin\psi) + C$.</li>
+                    <li>Imponemos la condición inicial: la cúspide (punto donde comienza la partícula) está en el origen.</li>
+                    <li>Para la cúspide, $\psi = 0$. En ese punto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y(0) = a(1 - \cos 0) = a(1 - 1) = 0$$</li>
+                    <li>Y queremos que $x(0) = 0$ también:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$0 = a(0 - \sin 0) + C = 0 + C$$</li>
+                    <li>Por tanto, $C = 0$.</li>
+                    <li>La solución paramétrica de la braquistócrona es:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$x = a(\psi - \sin\psi), \quad y = a(1 - \cos\psi)$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 21 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">¡Hemos encontrado una CICLOIDE!</h1>
+                <ul class="content-list">
+                    <li>La solución paramétrica:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x = a(\psi - \sin\psi), \quad y = a(1 - \cos\psi)$$</li>
+                    <li>es exactamente la ecuación paramétrica de una <strong>cicloide</strong>.</li>
+                    <li>Una cicloide es la curva trazada por un punto sobre la circunferencia de un círculo de radio $a$ que rueda sin deslizarse sobre una línea recta.</li>
+                    <li>El parámetro $\psi$ es el ángulo de rotación del círculo generador.</li>
+                    <li>La constante $a$ tiene unidades de longitud y está determinada por las condiciones de frontera (la distancia entre los dos puntos).</li>
+                    <li>Así, <strong>la braquistócrona es una cicloide</strong>.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Demostración de la Cúspide Inicial</h1>
+                <ul class="content-list">
+                    <li>Con la parametrización obtenida:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x(\psi=0) = a(0 - \sin 0) = 0$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y(\psi=0) = a(1 - \cos 0) = 0$$</li>
+                    <li>El punto inicial es $(0, 0)$ como esperábamos.</li>
+                    <li>Ahora miramos la pendiente en $\psi = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y' = \cot\frac{\psi}{2}$$</li>
+                    <li>Cuando $\psi \to 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\psi}{2} \to 0 \quad \Rightarrow \quad \cot\frac{\psi}{2} \to \infty$$</li>
+                    <li>La pendiente es <strong>infinita</strong> en el origen, lo que significa que la tangente es <strong>vertical</strong>.</li>
+                    <li style="text-align: center; margin-left: -50px;"><strong>Esto demuestra que la braquistócrona tiene una cúspide en el punto inicial.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title section">Caso 2: Partícula con velocidad inicial $v_0$</h1>
+                <ul class="content-list">
+                    <li>Ahora consideramos una partícula que no parte del reposo.</li>
+                    <li>En el punto inicial $A$ (con $y = 0$), la partícula tiene energía cinética:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$K_A = \frac{1}{2}mv_0^2$$</li>
+                    <li>En un punto cualquiera con coordenada $y$, por conservación de energía:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{1}{2}mv^2 = \frac{1}{2}mv_0^2 + mgy$$</li>
+                    <li>Dividimos por $\dfrac{m}{2}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$v^2 = v_0^2 + 2gy$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 24 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Definición de la altura característica $z$</h1>
+                <ul class="content-list">
+                    <li>Tenemos $v^2 = v_0^2 + 2gy$.</li>
+                    <li>El enunciado pide que demostremos que la altura de la cúspide cumple $v_0^2 = 2gz$.</li>
+                    <li>Definimos una cantidad $z$ mediante:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$v_0^2 = 2gz$$</span></li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$v^2 = 2gz + 2gy = 2g(y + z)$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$v = \sqrt{2g(y + z)}$$</li>
+                    <li>Esto muestra que la rapidez es como si la partícula hubiera caído desde una altura inicial $z$ sin velocidad inicial, más la caída desde $y$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Nueva Funcional de Tiempo</h1>
+                <ul class="content-list">
+                    <li>La funcional de tiempo ahora es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dt = \frac{ds}{v} = \frac{\sqrt{1 + (y')^2} \, dx}{\sqrt{2g(y + z)}}$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$T[y] = \int \frac{\sqrt{1 + (y')^2}}{\sqrt{2g(y + z)}} \, dx$$</li>
+                    <li><strong>Observación crucial:</strong> esta funcional tiene exactamente la misma estructura que antes:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$T[y] = \int \frac{\sqrt{1 + (y')^2}}{\sqrt{2g \cdot (\text{variable})}} \, dx$$</li>
+                    <li>Solo que ahora la "variable" es $(y + z)$ en lugar de $y$.</li>
+                    <li>Esto sugiere un cambio de variable inteligente.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Cambio de Variable: $Y = y + z$</h1>
+                <ul class="content-list">
+                    <li>Definimos una nueva coordenada:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$Y = y + z$$</span></li>
+                    <li>Derivando con respecto a $x$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Y' = \frac{dY}{dx} = \frac{d(y + z)}{dx} = \frac{dy}{dx} + 0 = y'$$</li>
+                    <li>porque $z$ es una constante (es la altura inicial característica).</li>
+                    <li>Con esta sustitución, la funcional de tiempo se convierte en:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$T[Y] = \int \frac{\sqrt{1 + (Y')^2}}{\sqrt{2gY}} \, dx$$</li>
+                    <li><strong>Pero esto es exactamente el mismo problema que ya resolvimos en el Caso 1,</strong> solo que con la variable $Y$ en lugar de $y$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Solución del Caso 2: Cicloide Desplazada</h1>
+                <ul class="content-list">
+                    <li>Por los mismos pasos algebraicos que en el Caso 1, la solución es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$x = a(\psi - \sin\psi), \quad Y = a(1 - \cos\psi)$$</li>
+                    <li>donde $Y = y + z$.</li>
+                    <li>Sustituyendo $Y = y + z$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y + z = a(1 - \cos\psi)$$</li>
+                    <li>Despejando $y$:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$x = a(\psi - \sin\psi), \quad y = a(1 - \cos\psi) - z$$</span></li>
+                    <li><strong>Sigue siendo una cicloide, pero desplazada verticalmente hacia arriba por una cantidad $z$.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 28 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Interpretación de la Cúspide Desplazada</h1>
+                <ul class="content-list">
+                    <li>En el Caso 1 (reposo), la cúspide de la cicloide estaba en $y = 0$ (el punto inicial).</li>
+                    <li>En el Caso 2 (con velocidad inicial), la cicloide se desplaza. La cúspide ocurre cuando:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Y = a(1 - \cos\psi) = 0$$</li>
+                    <li>Esto sucede en $\psi = 0$. En ese punto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y = a(1 - \cos 0) - z = a \cdot 0 - z = -z$$</li>
+                    <li>Como usamos $y$ positiva hacia abajo, $y = -z$ significa que la cúspide está a una altura $z$ <strong>por encima</strong> del punto inicial (donde $y = 0$).</li>
+                    <li>Y precisamente esa altura $z$ está definida por:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$v_0^2 = 2gz$$</span></li>
+                    <li><strong>Esto es exactamente lo que el enunciado pedía demostrar.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 29: Espacio para gráfico -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Visualización Gráfica</h1>
+                <p class="content-text" style="margin-bottom: 50px;">A continuación se muestra el gráfico que compara la braquistócrona (cicloide) con una línea recta entre los mismos extremos:</p>
+                <div style="width: 100%; height: 400px; background: #f9f9f9; border: 2px dashed #e0e0e0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #888888; font-size: 1.2rem;">
+                    [GRÁFICO: Braquistócrona vs Recta]
+                </div>
+                <p class="content-text" style="margin-top: 30px; font-size: 1.1rem;">La curva azul (cicloide) es la braquistócrona. La línea roja es la recta. Se observa que la cicloide desciende rápidamente al inicio, permitiendo que la partícula gane velocidad, resultando en un tiempo total menor.</p>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 30: Resumen -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Resumen Completo</h1>
+                <div style="text-align: left; font-size: 1.2rem; line-height: 1.9; max-width: 950px; margin: 0 auto;">
+                    <p><strong>Caso 1 (Reposo):</strong></p>
+                    <ul style="margin-left: 30px; margin-bottom: 20px;">
+                        <li>Funcional: $T[y] = \int \dfrac{\sqrt{1 + (y')^2}}{\sqrt{2gy}} dx$</li>
+                        <li>Beltrami: $y(1 + (y')^2) = 2a$</li>
+                        <li>Solución: $x = a(\psi - \sin\psi)$, $y = a(1 - \cos\psi)$ (Cicloide)</li>
+                        <li>Cúspide en el origen (0, 0)</li>
+                    </ul>
+                    <p><strong>Caso 2 (Velocidad inicial $v_0$):</strong></p>
+                    <ul style="margin-left: 30px;">
+                        <li>Relación: $v_0^2 = 2gz$</li>
+                        <li>Funcional: $T[y] = \int \dfrac{\sqrt{1 + (y')^2}}{\sqrt{2g(y+z)}} dx$</li>
+                        <li>Solución: $x = a(\psi - \sin\psi)$, $y = a(1 - \cos\psi) - z$ (Cicloide desplazada)</li>
+                        <li>Cúspide a altura $z$ sobre el punto inicial</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 31: Navegación de Ejercicios -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejercicios de Aplicación - Tarea 5</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto;">
+                    <p class="content-text" style="font-size: 1.3rem; margin-bottom: 30px;">
+                        Problemas completados de cálculo variacional:
+                    </p>
+                    <ul class="content-list" style="font-size: 1.2rem; line-height: 2.3;">
+                        <li><strong style="color: #2ecc71;">✓ Problema 1:</strong> Geodésicas en superficies (teoría general)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 3:</strong> La Braquistócrona (esta presentación)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 2:</strong> Geodésicas Esféricas</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 5:</strong> Principio de Fermat con índice radial</li>
+                    </ul>
+                    <p class="content-text" style="margin-top: 40px;">Navegación rápida:</p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="../ayudantia1-variacional-euler-lagrange/index.html" style="display: inline-block; padding: 12px 25px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">← Ayudantía 1</a>
+                        <a href="../geodesicas-esfera/index.html" style="display: inline-block; padding: 12px 25px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">Geodésicas</a>
+                        <a href="../fermat-indice-radial/index.html" style="display: inline-block; padding: 12px 25px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">Fermat →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">32</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prev-btn">←</button>
+        <button class="nav-button" id="next-btn">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+
+            const fragments = slides[currentSlide].querySelectorAll('[data-fragment-index]');
+            fragments.forEach(frag => frag.classList.remove('visible'));
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.getElementById('next-btn').addEventListener('click', nextSlide);
+        document.getElementById('prev-btn').addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        showSlide(0);
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.slide.active')) {
+                const fragments = document.querySelectorAll('.slide.active [data-fragment-index]');
+                const visibleFragments = document.querySelectorAll('.slide.active [data-fragment-index].visible');
+
+                if (visibleFragments.length < fragments.length) {
+                    const nextIndex = visibleFragments.length;
+                    const nextFragments = document.querySelectorAll(`.slide.active [data-fragment-index="${nextIndex}"]`);
+                    nextFragments.forEach(frag => frag.classList.add('visible'));
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+
+        // KaTeX auto-render
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

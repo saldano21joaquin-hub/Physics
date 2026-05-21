@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayudantía 1: Cálculo Variacional</title>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 50px 110px 50px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f5f1e8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 95px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .portada {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 25px;
+        }
+
+        .portada-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .portada-subtitle {
+            font-size: 1.7rem;
+            color: #5a5a5a;
+            margin-top: 10px;
+            line-height: 1.3;
+        }
+
+        .portada-divider {
+            width: 250px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #e0a456, transparent);
+            margin: 20px 0;
+        }
+
+        .portada-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #6a6a6a;
+        }
+
+        .portada-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .portada-info-label {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .portada-info-value {
+            font-size: 1.3rem;
+            color: #2c2c2c;
+            font-weight: 500;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .slide-title.question {
+            font-size: 2rem;
+            color: #e0a456;
+        }
+
+        .content-text {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            line-height: 1.7;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .content-list {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+            line-height: 1.85;
+        }
+
+        .content-list li {
+            margin-bottom: 12px;
+        }
+
+        .math-block {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(224, 160, 86, 0.05);
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex: 1;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .column-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e0a456;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .column-content {
+            font-size: 1.15rem;
+            color: #2c2c2c;
+            line-height: 1.9;
+        }
+
+        .equation-line {
+            margin: 12px 0;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fragment {
+            opacity: 0;
+        }
+
+        .fragment.visible {
+            opacity: 1;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            font-size: 0.95rem;
+            color: #888888;
+            z-index: 10;
+            min-height: 70px;
+            border-top: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-left {
+            text-align: left;
+            flex: 1;
+            padding-right: 20px;
+            word-wrap: break-word;
+        }
+
+        .footer-center {
+            text-align: center;
+            flex: 1;
+            padding: 0 20px;
+            word-wrap: break-word;
+        }
+
+        .footer-right {
+            text-align: right;
+            flex: 1;
+            padding-left: 20px;
+            word-wrap: break-word;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e0e0e0;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #2c2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #f5f1e8;
+            border-color: #e0a456;
+            color: #e0a456;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.95rem;
+            color: #8a8a8a;
+            z-index: 100;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            color: #2c2c2c;
+        }
+
+        strong {
+            color: #e0a456;
+            font-weight: 700;
+        }
+
+        em {
+            color: #e0a456;
+            font-style: italic;
+        }
+
+        .boxed {
+            border: 2px solid #e0a456;
+            padding: 15px 25px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 20px 0;
+            background: rgba(224, 160, 86, 0.08);
+        }
+
+        .definition-box {
+            border-left: 4px solid #e0a456;
+            padding: 15px 25px;
+            background: rgba(224, 160, 86, 0.08);
+            margin: 15px 0;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 1.2rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+
+        <!-- SLIDE 1: Portada -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="portada">
+                    <div class="portada-title">Cálculo variacional y ecuaciones de Euler–Lagrange</div>
+                    <div class="portada-subtitle">Desde la variación de curvas hasta el principio de Hamilton</div>
+                    <div class="portada-divider"></div>
+                    <div class="portada-info">
+                        <div class="portada-info-item">
+                            <span class="portada-info-label">Ayudante</span>
+                            <span class="portada-info-value">Joaquín Saldaño</span>
+                        </div>
+                        <div class="portada-info-item">
+                            <span class="portada-info-label">Curso</span>
+                            <span class="portada-info-value">Mecánica Intermedia 2026</span>
+                        </div>
+                        <div class="portada-info-item">
+                            <span class="portada-info-label">Universidad</span>
+                            <span class="portada-info-value">Universidad de Valparaíso</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title question">¿Qué problema estamos tratando de resolver?</h1>
+                <ul class="content-list">
+                    <li>En mecánica elemental uno suele partir desde una ecuación diferencial:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$m\ddot x = F$$</li>
+                    <li>o, en varias dimensiones,</li>
+                    <li style="text-align: center; margin-left: -50px;">$$m\ddot{\vec r}=\vec F$$</li>
+                    <li>Aquí vamos a invertir el punto de partida.</li>
+                    <li>En lugar de preguntar primero por la fuerza y después por la trayectoria, vamos a preguntar:</li>
+                    <li style="font-style: italic;">entre todas las curvas posibles que unen dos puntos, ¿cuál es la curva físicamente o geométricamente privilegiada?</li>
+                    <li><strong>Ésa es la entrada al cálculo variacional.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title question">¿Qué significa extremizar?</h1>
+                <ul class="content-list">
+                    <li>En cálculo ordinario, si tenemos una función $f(a)$ y queremos buscar un extremo, estudiamos cómo cambia al deformar $a$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$a \to a+\varepsilon$$</li>
+                    <li>Por ejemplo, si $f(a)=a^2$ entonces</li>
+                    <li style="text-align: center; margin-left: -50px;">$$f(a+\varepsilon)=(a+\varepsilon)^2=a^2+2a\varepsilon+\varepsilon^2$$</li>
+                    <li>El cambio es</li>
+                    <li style="text-align: center; margin-left: -50px;">$$f(a+\varepsilon)-f(a)=2a\varepsilon+\varepsilon^2$$</li>
+                    <li>Si $\varepsilon$ es pequeño, el término relevante a primer orden es $2a\varepsilon$.</li>
+                    <li>Para que $a$ sea un punto extremo, el cambio lineal debe anularse.</li>
+                    <li>Entonces: $2a=0$ y se obtiene $a=0$.</li>
+                    <li><strong>La idea que nos interesa conservar es: extremizar significa hacer cero el cambio de primer orden.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">De una variable a una curva completa</h1>
+                <ul class="content-list">
+                    <li>En cálculo variacional ya no se deforma un número aislado.</li>
+                    <li>Se deforma una <strong>función completa</strong>.</li>
+                    <li>Es decir, ya no buscamos un valor especial de $a$, sino una curva especial $y(x)$.</li>
+                    <li>A cada curva $y(x)$ le asociamos un número que será una integral.</li>
+                    <li>Una regla que toma una función y devuelve un número se llama <strong>funcional</strong>.</li>
+                    <li>Una funcional típica tiene la forma:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[y]=\int_a^b \mathcal E(y,y',x)\,dx$$</li>
+                    <li>donde: $y(x)$ es la curva, $y'=\dfrac{dy}{dx}$, $\mathcal E$ es el integrando, e $I[y]$ es el número asociado a esa curva.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Primer ejemplo de funcional</h1>
+                <ul class="content-list">
+                    <li>Si queremos la curva más corta entre dos puntos del plano, usamos el elemento de arco:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds=\sqrt{dx^2+dy^2}$$</li>
+                    <li>Si la curva está escrita como $y(x)$, entonces $dy=y' dx$, luego</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds=\sqrt{dx^2+(y' dx)^2}=\sqrt{1+(y')^2}\,dx$$</li>
+                    <li>Por tanto, la longitud total es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[y]=\int_a^b \sqrt{1+(y')^2}\,dx$$</li>
+                    <li>Aquí el integrando es $\mathcal E(y,y',x)=\sqrt{1+(y')^2}$.</li>
+                    <li><strong>Lo importante es la estructura:</strong> a cada curva $y(x)$ le asignamos un número $I[y]$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">¿Cómo se varía una curva?</h1>
+                <ul class="content-list">
+                    <li>Si en cálculo ordinario hacíamos $a\to a+\varepsilon$, ahora hacemos lo análogo con una curva:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Y(x)=y(x)+\varepsilon \eta(x)$$</li>
+                    <li>Aquí: $y(x)$ es la curva base, $\eta(x)$ es una deformación arbitraria, $\varepsilon$ es un parámetro pequeño, $Y(x)$ es una curva vecina.</li>
+                    <li>Derivando:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$Y'(x)=y'(x)+\varepsilon \eta'(x)$$</li>
+                    <li>Si los extremos están fijos, imponemos $Y(a)=y(a)$ y $Y(b)=y(b)$.</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\eta(a)=0,\qquad \eta(b)=0$$</li>
+                    <li><strong>Esto será esencial cuando integremos por partes.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Variación de la funcional</h1>
+                <ul class="content-list">
+                    <li>Evaluamos la funcional en la curva deformada:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[Y]=\int_a^b \mathcal E(Y,Y',x)\,dx$$</li>
+                    <li>Sustituyendo $Y=y+\varepsilon\eta$ y $Y'=y'+\varepsilon\eta'$, obtenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[Y]=\int_a^b \mathcal E(y+\varepsilon\eta,\; y'+\varepsilon\eta',\; x)\,dx$$</li>
+                    <li>Ahora expandimos el integrando a primer orden en $\varepsilon$. Usando Taylor:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\mathcal E(y+\varepsilon\eta,\; y'+\varepsilon\eta',\; x)=\mathcal E(y,y',x)+\frac{\partial \mathcal E}{\partial y}\,\varepsilon\eta+\frac{\partial \mathcal E}{\partial y'}\,\varepsilon\eta'+O(\varepsilon^2)$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[Y]=\int_a^b \left[\mathcal E(y,y',x)+\varepsilon\frac{\partial \mathcal E}{\partial y}\eta+\varepsilon\frac{\partial \mathcal E}{\partial y'}\eta'+O(\varepsilon^2)\right]dx$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: DOS COLUMNAS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Separación de términos</h1>
+                <div class="two-column">
+                    <div class="column">
+                        <div class="column-title">Expansión paso a paso</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="0">$$I[Y]=\int_a^b \mathcal E(y,y',x)\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="1">$$+ \varepsilon \int_a^b \frac{\partial \mathcal E}{\partial y}\eta\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="2">$$+ \varepsilon \int_a^b \frac{\partial \mathcal E}{\partial y'}\eta'\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="3">$$+ \int_a^b O(\varepsilon^2)\,dx$$</div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="column-title">Agrupación y definición</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="4">$$I[Y]=I[y]+\varepsilon \int_a^b \left(\frac{\partial \mathcal E}{\partial y}\eta+\frac{\partial \mathcal E}{\partial y'}\eta'\right)dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="5">$$+O(\varepsilon^2)$$</div>
+                            <div class="equation-line fragment" data-fragment-index="6">Definimos la <strong>primera variación</strong> por:</div>
+                            <div class="equation-line fragment" data-fragment-index="7">$$\delta I=\int_a^b \left(\frac{\partial \mathcal E}{\partial y}\eta+\frac{\partial \mathcal E}{\partial y'}\eta'\right)dx$$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Condición de estacionariedad</h1>
+                <ul class="content-list">
+                    <li>El análogo de "anular el término lineal" ahora es imponer:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta I=0$$</li>
+                    <li>Entonces la curva buscada debe satisfacer:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\int_a^b \left(\frac{\partial \mathcal E}{\partial y}\eta+\frac{\partial \mathcal E}{\partial y'}\eta'\right)dx=0$$</li>
+                    <li>Pero todavía hay un problema: <strong>aparece $\eta'$</strong>.</li>
+                    <li>Queremos reescribir todo en función de $\eta$ sola.</li>
+                    <li><strong>Para eso se integra por partes.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: DOS COLUMNAS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Integración por partes</h1>
+                <div class="two-column">
+                    <div class="column">
+                        <div class="column-title">Configuración de IPP</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="0">Consideremos:</div>
+                            <div class="equation-line fragment" data-fragment-index="1">$$\int_a^b \frac{\partial \mathcal E}{\partial y'}\eta'\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="2">Elegimos:</div>
+                            <div class="equation-line fragment" data-fragment-index="3">$$u=\frac{\partial \mathcal E}{\partial y'}$$</div>
+                            <div class="equation-line fragment" data-fragment-index="4">$$dv=\eta' dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="5">Entonces:</div>
+                            <div class="equation-line fragment" data-fragment-index="6">$$du=\frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="7">$$v=\eta$$</div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="column-title">Aplicación de IPP</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="8">Por integración por partes:</div>
+                            <div class="equation-line fragment" data-fragment-index="9">$$\int_a^b \frac{\partial \mathcal E}{\partial y'}\eta'\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="10">$$=\left[\frac{\partial \mathcal E}{\partial y'}\eta\right]_a^b-\int_a^b \frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)\eta\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="11">Como $\eta(a)=\eta(b)=0$, el término de borde se anula.</div>
+                            <div class="equation-line fragment" data-fragment-index="12">Luego:</div>
+                            <div class="equation-line fragment" data-fragment-index="13">$$\int_a^b \frac{\partial \mathcal E}{\partial y'}\eta'\,dx$$</div>
+                            <div class="equation-line fragment" data-fragment-index="14">$$=-\int_a^b \frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)\eta\,dx$$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Reunión de términos</h1>
+                <ul class="content-list">
+                    <li>Sustituyendo en $\delta I$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta I=\int_a^b \frac{\partial \mathcal E}{\partial y}\eta\,dx-\int_a^b \frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)\eta\,dx$$</li>
+                    <li>Reuniendo términos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta I=\int_a^b \left[\frac{\partial \mathcal E}{\partial y}-\frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)\right]\eta\,dx$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Paso decisivo</h1>
+                <ul class="content-list">
+                    <li>La función $\eta(x)$ es <strong>arbitraria en el interior</strong> del intervalo.</li>
+                    <li>Solo está fijada en los extremos.</li>
+                    <li>Por tanto, para que:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta I=\int_a^b \left[\frac{\partial \mathcal E}{\partial y}-\frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)\right]\eta\,dx=0$$</li>
+                    <li>se cumpla para <strong>toda variación admisible</strong> $\eta(x)$,</li>
+                    <li>el <strong>coeficiente de $\eta$ debe anularse punto a punto</strong>.</li>
+                    <li>Así obtenemos la ecuación de Euler–Lagrange:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{d}{dx}\left(\frac{\partial \mathcal E}{\partial y'}\right)-\frac{\partial \mathcal E}{\partial y}=0$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Qué se acaba de demostrar</h1>
+                <ul class="content-list">
+                    <li>El cálculo variacional parte desde una <strong>condición global sobre curvas</strong>: hacer estacionaria una integral.</li>
+                    <li>Y termina produciendo una <strong>ecuación diferencial local</strong>.</li>
+                    <li><strong>Ésa es la idea central del bloque.</strong></li>
+                    <li>Se puede resumir así:</li>
+                    <li style="margin-left: 20px;">curva $y(x)$</li>
+                    <li style="margin-left: 40px;">$\to$ deformación $Y(x)=y(x)+\varepsilon\eta(x)$</li>
+                    <li style="margin-left: 40px;">$\to$ cálculo de $\delta I$</li>
+                    <li style="margin-left: 40px;">$\to$ integración por partes</li>
+                    <li style="margin-left: 40px;">$\to$ ecuación de Euler–Lagrange</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejemplo mínimo: la recta</h1>
+                <ul class="content-list">
+                    <li>Si $I[y]=\int_a^b \sqrt{1+(y')^2}\,dx$, entonces $\mathcal E=\sqrt{1+(y')^2}$.</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\dfrac{\partial \mathcal E}{\partial y}=0$$</li>
+                    <li>y</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\dfrac{\partial \mathcal E}{\partial y'}=\dfrac{y'}{\sqrt{1+(y')^2}}$$</li>
+                    <li>Euler–Lagrange da:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\dfrac{d}{dx}\left(\dfrac{y'}{\sqrt{1+(y')^2}}\right)=0$$</li>
+                    <li>Luego:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\dfrac{y'}{\sqrt{1+(y')^2}}=C$$</li>
+                    <li>De aquí se sigue que $y'=\text{constante}$, luego:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$y=mx+n$$</li>
+                    <li><strong>Es decir, la curva extremal es una recta.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Principio de Fermat</h1>
+                <ul class="content-list">
+                    <li>En óptica geométrica, la luz no se describe primero con fuerzas.</li>
+                    <li>Se describe <strong>variacionalmente</strong>.</li>
+                    <li>El tiempo de tránsito es: $t=\int dt=\int \frac{ds}{v}$</li>
+                    <li>Si el medio tiene índice de refracción $n$, entonces $v=\dfrac{c}{n}$.</li>
+                    <li>Por tanto: $dt=\dfrac{n\,ds}{c}$</li>
+                    <li>Luego: $t=\dfrac{1}{c}\int n\,ds$</li>
+                    <li>Como $1/c$ es constante, la funcional efectiva es:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$I=\int n\,ds$$</span></li>
+                    <li><strong>Otra vez aparece exactamente la misma estructura variacional.</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Paso a mecánica: principio de Hamilton</h1>
+                <ul class="content-list">
+                    <li>Ahora se cambia el problema geométrico por uno mecánico.</li>
+                    <li>En lugar de una curva espacial $y(x)$, consideramos una <strong>trayectoria dinámica $q(t)$</strong>.</li>
+                    <li>En lugar de una funcional genérica: $I[y]=\int \mathcal E(y,y',x)\,dx$,</li>
+                    <li>consideramos la <strong>acción</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$S[q]=\int_{t_1}^{t_2}L(q,\dot q,t)\,dt$$</span></li>
+                    <li>Aquí $L$ se llama <strong>lagrangiano</strong>.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">¿Qué es el lagrangiano?</h1>
+                <ul class="content-list">
+                    <li>El lagrangiano es la <strong>función que caracteriza dinámicamente</strong> al sistema.</li>
+                    <li>En general depende de:</li>
+                    <li style="margin-left: 40px;">las <strong>coordenadas generalizadas</strong> $q_i$,</li>
+                    <li style="margin-left: 40px;">las <strong>velocidades generalizadas</strong> $\dot q_i$,</li>
+                    <li style="margin-left: 40px;">y eventualmente del <strong>tiempo</strong> $t$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$L=L(q_1,\dots,q_n,\dot q_1,\dots,\dot q_n,t)$$</li>
+                    <li>Para sistemas conservativos, la forma más habitual es:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$L=T-U$$</span></li>
+                    <li>donde: $T$ es la energía cinética, $U$ es la energía potencial.</li>
+                    <li>Esta forma no se inventa al azar: funciona porque conduce a ecuaciones equivalentes a Newton cuando el sistema es conservativo.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Qué postula el principio de Hamilton</h1>
+                <ul class="content-list">
+                    <li>Entre los tiempos fijos $t_1$ y $t_2$, el sistema pasa por configuraciones fijas en los extremos: $q(t_1)$ y $q(t_2)$.</li>
+                    <li>El principio de Hamilton afirma que la trayectoria real es aquella que hace <strong>estacionaria la acción</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\delta \int_{t_1}^{t_2}L(q,\dot q,t)\,dt=0$$</span></li>
+                    <li>La variación se hace con <strong>extremos fijos</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta q(t_1)=0,\qquad \delta q(t_2)=0$$</li>
+                    <li>La <strong>estructura matemática es la misma</strong> que en cálculo variacional ordinario.</li>
+                    <li>Solo cambian los nombres: $x\to t$, $y\to q$, $y'\to \dot q$, $\mathcal E \to L$.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Aplicación de la variación a la acción</h1>
+                <ul class="content-list">
+                    <li>Partimos de: $S[q]=\int_{t_1}^{t_2}L(q,\dot q,t)\,dt$</li>
+                    <li>y variamos: $q(t)\to q(t)+\varepsilon \eta(t)$ con $\eta(t_1)=0,\qquad \eta(t_2)=0$</li>
+                    <li>Entonces: $\dot q(t)\to \dot q(t)+\varepsilon \dot\eta(t)$</li>
+                    <li>La variación de la acción queda:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta S=\int_{t_1}^{t_2}\left(\frac{\partial L}{\partial q}\eta+\frac{\partial L}{\partial \dot q}\dot\eta\right)dt$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: DOS COLUMNAS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Integración por partes en el tiempo</h1>
+                <div class="two-column">
+                    <div class="column">
+                        <div class="column-title">Configuración</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="0">Integramos por partes el segundo término:</div>
+                            <div class="equation-line fragment" data-fragment-index="1">$$\int_{t_1}^{t_2}\frac{\partial L}{\partial \dot q}\dot\eta\,dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="2">Elegimos:</div>
+                            <div class="equation-line fragment" data-fragment-index="3">$$u=\frac{\partial L}{\partial \dot q}$$</div>
+                            <div class="equation-line fragment" data-fragment-index="4">$$dv=\dot\eta\,dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="5">Entonces:</div>
+                            <div class="equation-line fragment" data-fragment-index="6">$$du=\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="7">$$v=\eta$$</div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="column-title">Resultado</div>
+                        <div class="column-content">
+                            <div class="equation-line fragment" data-fragment-index="8">$$\int_{t_1}^{t_2}\frac{\partial L}{\partial \dot q}\dot\eta\,dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="9">$$=\left[\frac{\partial L}{\partial \dot q}\eta\right]_{t_1}^{t_2}$$</div>
+                            <div class="equation-line fragment" data-fragment-index="10">$$-\int_{t_1}^{t_2}\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)\eta\,dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="11">Como $\eta(t_1)=\eta(t_2)=0$, el borde desaparece.</div>
+                            <div class="equation-line fragment" data-fragment-index="12">Luego:</div>
+                            <div class="equation-line fragment" data-fragment-index="13">$$\int_{t_1}^{t_2}\frac{\partial L}{\partial \dot q}\dot\eta\,dt$$</div>
+                            <div class="equation-line fragment" data-fragment-index="14">$$=-\int_{t_1}^{t_2}\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)\eta\,dt$$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 21 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Obtención de las ecuaciones de Lagrange</h1>
+                <ul class="content-list">
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta S=\int_{t_1}^{t_2}\frac{\partial L}{\partial q}\eta\,dt-\int_{t_1}^{t_2}\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)\eta\,dt$$</li>
+                    <li>Reuniendo términos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\delta S=\int_{t_1}^{t_2}\left[\frac{\partial L}{\partial q}-\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)\right]\eta\,dt$$</li>
+                    <li>Como $\eta(t)$ es arbitraria en el interior del intervalo, se obtiene:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q}\right)-\frac{\partial L}{\partial q}=0$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Generalización a varios grados de libertad</h1>
+                <ul class="content-list">
+                    <li>Si el sistema tiene coordenadas generalizadas $q_1,\dots,q_n$, entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$L=L(q_1,\dots,q_n,\dot q_1,\dots,\dot q_n,t)$$</li>
+                    <li>y la acción es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$S=\int_{t_1}^{t_2}L\,dt$$</li>
+                    <li>Variando cada coordenada de forma independiente, se obtiene para cada $i$:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot q_i}\right)-\frac{\partial L}{\partial q_i}=0,\qquad i=1,\dots,n$$</span></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: Ejemplo partícula libre -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejemplo: Partícula libre</h1>
+                <ul class="content-list">
+                    <li>Una partícula libre tiene solo energía cinética:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$L = T = \frac{1}{2}m\dot{\vec{r}}^2 = \frac{1}{2}m(\dot{x}^2 + \dot{y}^2 + \dot{z}^2)$$</li>
+                    <li>Para la coordenada $x$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial L}{\partial x} = 0$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial L}{\partial \dot{x}} = m\dot{x}$$</li>
+                    <li>Aplicamos Euler-Lagrange:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{dt}(m\dot{x}) - 0 = 0$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$m\ddot{x} = 0$$</li>
+                    <li><strong>La aceleración es cero, el momentum se conserva:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$p_x = m\dot{x} = \text{constante}$$</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 24: Recuperación de Newton -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Recuperación de las ecuaciones de Newton</h1>
+                <ul class="content-list">
+                    <li>Para un sistema conservativo en una dimensión:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$L = T - U = \frac{1}{2}m\dot{x}^2 - U(x)$$</li>
+                    <li>Calculamos las derivadas:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial L}{\partial x} = -\frac{dU}{dx} = -\frac{\partial U}{\partial x}$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial L}{\partial \dot{x}} = m\dot{x}$$</li>
+                    <li>Aplicamos Euler-Lagrange:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{dt}(m\dot{x}) - \left(-\frac{\partial U}{\partial x}\right) = 0$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$m\ddot{x} = -\frac{\partial U}{\partial x} = -\frac{dU}{dx}$$</li>
+                    <li><strong>Pero $F = -\frac{dU}{dx}$, luego:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$m\ddot{x} = F$$</span></li>
+                    <li><strong>¡Hemos recuperado la segunda ley de Newton!</strong></li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Resumen final del bloque</h1>
+                <ol class="content-list">
+                    <li>Se define una funcional.</li>
+                    <li>Se deforma la curva o trayectoria.</li>
+                    <li>Se calcula la variación a primer orden.</li>
+                    <li>Se integra por partes.</li>
+                    <li>Se usan extremos fijos.</li>
+                    <li>Se obtiene Euler–Lagrange.</li>
+                </ol>
+                <p class="content-text" style="margin-top: 30px;">En cálculo variacional ordinario:</p>
+                <div class="math-block">$$\dfrac{d}{dx}\left(\dfrac{\partial \mathcal E}{\partial y'}\right)-\dfrac{\partial \mathcal E}{\partial y}=0$$</div>
+                <p class="content-text">En mecánica:</p>
+                <div class="math-block">$$\dfrac{d}{dt}\left(\dfrac{\partial L}{\partial \dot q_i}\right)-\dfrac{\partial L}{\partial q_i}=0$$</div>
+                <p class="content-text"><strong>Ése es el puente entre variación y dinámica.</strong></p>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Cierre: Síntesis final</h1>
+                <div class="definition-box">
+                    El cálculo variacional <strong>no es un adorno formal</strong>. Es el mecanismo que permite pasar de una <strong>condición global</strong> sobre trayectorias a una <strong>ecuación diferencial local</strong>.
+                </div>
+                <p class="content-text" style="margin-top: 40px;">
+                    En la siguiente parte ya se puede entrar a <strong>ejemplos mecánicos concretos</strong> usando:
+                </p>
+                <ul class="content-list" style="margin-top: 20px;">
+                    <li>$L=T-U$</li>
+                    <li>Coordenadas generalizadas</li>
+                    <li>Ecuaciones de Euler–Lagrange sin saltarse el origen de la teoría</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: Ejercicios de Aplicación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejercicios de Aplicación - Tarea 5</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto;">
+                    <p class="content-text" style="font-size: 1.3rem; margin-bottom: 25px;">
+                        Los siguientes ejercicios aplican directamente la teoría de Euler-Lagrange y el cálculo variacional:
+                    </p>
+                    <ul class="content-list" style="font-size: 1.2rem; line-height: 2.2;">
+                        <li><strong>Problema 1: Geodésicas en superficies</strong> - Aplicación de principios variacionales a geometría diferencial</li>
+                        <li><strong>Problema 2: Ecuaciones de movimiento en coordenadas generalizadas</strong> - Lagrangiano y mecánica</li>
+                        <li style="background: rgba(224, 160, 86, 0.15); padding: 12px 15px; border-radius: 6px; margin: 15px 0;">
+                            <strong style="color: #e0a456;">Problema 3: La Braquistócrona</strong>
+                            <br style="margin: 8px 0;">
+                            <em>Curva de tiempo mínimo bajo gravedad</em>
+                            <br style="margin: 8px 0;">
+                            <a href="../braquistocrona/index.html" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-style: normal;">
+                                → Abrir Presentación Braquistócrona
+                            </a>
+                        </li>
+                        <li style="background: rgba(224, 160, 86, 0.15); padding: 12px 15px; border-radius: 6px; margin: 15px 0;">
+                            <strong style="color: #e0a456;">Problema 2: Geodésicas Esféricas</strong>
+                            <br style="margin: 8px 0;">
+                            <em>Líneas de menor distancia en superficies esféricas</em>
+                            <br style="margin: 8px 0;">
+                            <a href="../geodesicas-esfera/index.html" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-style: normal;">
+                                → Abrir Presentación Geodésicas Esféricas
+                            </a>
+                        </li>
+                        <li style="background: rgba(224, 160, 86, 0.15); padding: 12px 15px; border-radius: 6px; margin: 15px 0;">
+                            <strong style="color: #e0a456;">Problema 5: Principio de Fermat</strong>
+                            <br style="margin: 8px 0;">
+                            <em>Rayos en atmósfera con índice radial</em>
+                            <br style="margin: 8px 0;">
+                            <a href="../fermat-indice-radial/index.html" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-style: normal;">
+                                → Abrir Presentación Fermat
+                            </a>
+                        </li>
+                        <li><strong>Problema 5: Oscilador armónico forzado</strong> - Sistema conservativo con fuerza externa</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">24</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prev-btn">←</button>
+        <button class="nav-button" id="next-btn">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+
+            const fragments = slides[currentSlide].querySelectorAll('[data-fragment-index]');
+            fragments.forEach(frag => frag.classList.remove('visible'));
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.getElementById('next-btn').addEventListener('click', nextSlide);
+        document.getElementById('prev-btn').addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        showSlide(0);
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.slide.active')) {
+                const fragments = document.querySelectorAll('.slide.active [data-fragment-index]');
+                const visibleFragments = document.querySelectorAll('.slide.active [data-fragment-index].visible');
+
+                if (visibleFragments.length < fragments.length) {
+                    const nextIndex = visibleFragments.length;
+                    const nextFragments = document.querySelectorAll(`.slide.active [data-fragment-index="${nextIndex}"]`);
+                    nextFragments.forEach(frag => frag.classList.add('visible'));
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+
+        // KaTeX auto-render
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problema 5: Principio de Fermat - Índice Radial</title>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 50px 110px 50px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f5f1e8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 95px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .slide-marker {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #2ecc71, transparent);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .portada {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 25px;
+        }
+
+        .portada-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .portada-subtitle {
+            font-size: 1.7rem;
+            color: #5a5a5a;
+            margin-top: 10px;
+            line-height: 1.3;
+        }
+
+        .portada-divider {
+            width: 250px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #e0a456, transparent);
+            margin: 20px 0;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .slide-title.section {
+            font-size: 2rem;
+            color: #e0a456;
+        }
+
+        .content-text {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            line-height: 1.7;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .content-list {
+            font-size: 1.25rem;
+            color: #2c2c2c;
+            text-align: left;
+            max-width: 950px;
+            margin: 0 auto;
+            line-height: 1.85;
+        }
+
+        .content-list li {
+            margin-bottom: 12px;
+        }
+
+        .math-block {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(224, 160, 86, 0.05);
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            font-size: 0.95rem;
+            color: #888888;
+            z-index: 10;
+            min-height: 70px;
+            border-top: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-left, .footer-center, .footer-right {
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        .footer-left {
+            text-align: left;
+            padding-right: 20px;
+        }
+
+        .footer-center {
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .footer-right {
+            text-align: right;
+            padding-left: 20px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e0e0e0;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #2c2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #f5f1e8;
+            border-color: #e0a456;
+            color: #e0a456;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.95rem;
+            color: #8a8a8a;
+            z-index: 100;
+        }
+
+        strong {
+            color: #e0a456;
+            font-weight: 700;
+        }
+
+        .boxed {
+            border: 2px solid #e0a456;
+            padding: 15px 25px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 20px 0;
+            background: rgba(224, 160, 86, 0.08);
+        }
+
+        .nav-link-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .nav-link-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #e0e0e0;
+            color: #2c2c2c;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .nav-link-btn:hover {
+            background: #e0a456;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+
+        <!-- SLIDE 1: Portada -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="portada">
+                    <div class="portada-title">Problema 5: Principio de Fermat</div>
+                    <div class="portada-subtitle">Rayos en una atmósfera con índice radial</div>
+                    <div class="portada-divider"></div>
+                    <div style="font-size: 1.2rem; color: #6a6a6a; margin-top: 30px;">
+                        Cálculo variacional aplicado a <strong>óptica geométrica</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Conexión y Navegación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title section">Conexión con la Teoría</h1>
+                <ul class="content-list">
+                    <li>Este problema es una <strong>aplicación directa</strong> del cálculo variacional a óptica:</li>
+                    <li style="margin-left: 30px;">✓ Extremización de funcionales (principio variacional)</li>
+                    <li style="margin-left: 30px;">✓ Primera integral de Beltrami (simetría del problema)</li>
+                    <li style="margin-left: 30px;">✓ Ecuación de Euler–Lagrange (órbitas)</li>
+                    <li style="margin-left: 30px;">✓ Interpretación física (rayos de luz)</li>
+                </ul>
+                <div class="nav-link-section" style="text-align: center;">
+                    <a href="../ayudantia1-variacional-euler-lagrange/index.html" class="nav-link-btn">← Ayudantía 1</a>
+                    <a href="../braquistocrona/index.html" class="nav-link-btn">Braquistócrona</a>
+                    <a href="../geodesicas-esfera/index.html" class="nav-link-btn">Geodésicas →</a>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Enunciado del Problema -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Enunciado del Problema 5</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto; background: rgba(224, 160, 86, 0.1); padding: 18px; border-left: 4px solid #e0a456; border-radius: 4px; font-size: 1rem; line-height: 1.7;">
+                    En óptica geométrica, la trayectoria de un rayo de luz viene dada por el principio de Fermat, el cual establece que un rayo viaja entre dos puntos fijos de manera tal que el tiempo de tránsito es estacionario con respecto a pequeñas variaciones del camino. Considere la propagación de rayos de luz en la atmósfera de la Tierra, asumiendo que el índice de refracción $n$ es sólo función de la distancia desde el centro de la Tierra. Exprese el principio de Fermat en forma integral. Derive la siguiente ecuación de un rayo en la atmósfera: $$\frac{dr}{d\phi} = r\sqrt{kn^2r^2-1}$$ donde $k$ es una constante y $(r, \phi)$ son las coordenadas azimutales de un punto sobre el rayo con el centro de la Tierra como origen. Si $n$ es proporcional a $r^m$, encuentre el valor de $m$ tal que un rayo que se mueve inicialmente a lo largo de una dirección tangencial (paralela a $\phi$) permanezca a una distancia constante desde el centro de la Tierra para cualquier valor de $r$.
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Qué hay que hacer -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">1. Qué hay que hacer aquí</h1>
+                <ul class="content-list">
+                    <li>Este problema es <strong>variacional, pero no mecánico</strong> en el sentido usual de $L = T - U$.</li>
+                    <li>Aquí la cantidad que se extremiza es el <strong>tiempo de tránsito</strong> de la luz.</li>
+                    <li>La estrategia es:</li>
+                    <li style="margin-left: 30px;">1. Escribir el tiempo total como una integral sobre la trayectoria</li>
+                    <li style="margin-left: 30px;">2. Reconocer ahí una funcional</li>
+                    <li style="margin-left: 30px;">3. Aplicar cálculo variacional (Beltrami + Euler–Lagrange)</li>
+                    <li style="margin-left: 30px;">4. Usar la simetría radial para simplificar</li>
+                    <li style="margin-left: 30px;">5. Interpretar el resultado físicamente</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Principio de Fermat -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">2. El Principio de Fermat</h1>
+                <ul class="content-list">
+                    <li>El <strong>Principio de Fermat</strong> dice que la luz viaja entre dos puntos por un camino tal que el <strong>tiempo de tránsito es estacionario</strong> (extremal) frente a pequeñas variaciones del camino.</li>
+                    <li style="margin-top: 20px;">Sea $ds$ el elemento de arco a lo largo de la trayectoria del rayo.</li>
+                    <li>Si la rapidez de la luz en el medio es $v$, entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dt = \frac{ds}{v}$$</li>
+                    <li>Por tanto, el tiempo total es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$t = \int dt = \int \frac{ds}{v}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Índice de refracción -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">2. Tiempo de tránsito y índice de refracción</h1>
+                <ul class="content-list">
+                    <li>Usamos la relación entre velocidad de la luz en un medio e índice de refracción:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$v = \frac{c}{n}$$</li>
+                    <li>donde $c$ es la velocidad de la luz en el vacío y $n$ es el índice de refracción del medio.</li>
+                    <li>Sustituyendo en $dt = \dfrac{ds}{v}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dt = \frac{ds}{c/n} = \frac{n \, ds}{c}$$</li>
+                    <li>Entonces el tiempo total es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$t = \frac{1}{c}\int n \, ds$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Forma integral de Fermat -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">2. Forma Integral del Principio de Fermat</h1>
+                <ul class="content-list">
+                    <li>Como $1/c$ es una constante, no afecta la condición variacional.</li>
+                    <li>Así, el <strong>Principio de Fermat</strong> puede escribirse en forma integral como:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 30px; margin-bottom: 30px;"><span class="boxed">$$\delta \int n \, ds = 0$$</span></li>
+                    <li><strong>Ésta es la forma integral que pide el problema.</strong></li>
+                    <li>Dice que la luz elige el camino que hace <strong>estacionaria</strong> la integral del índice de refracción a lo largo de la trayectoria.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Simetría radial -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Simetría radial: coordenadas convenientes</h1>
+                <ul class="content-list">
+                    <li>El problema dice que el índice de refracción depende <strong>solo de la distancia al centro</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n = n(r)$$</li>
+                    <li>Eso significa que el medio es <strong>esféricamente simétrico</strong>.</li>
+                    <li>Por simetría, el rayo queda contenido en un <strong>plano</strong> (el plano que contiene el centro y las velocidades inicial/final).</li>
+                    <li>Entonces basta trabajar en <strong>coordenadas polares planas</strong> $(r, \phi)$ dentro de ese plano.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Elemento de arco en polares -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Elemento de arco en coordenadas polares - Parte I</h1>
+                <ul class="content-list">
+                    <li>El elemento de arco en coordenadas polares planas es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds^2 = dr^2 + r^2 \, d\phi^2$$</li>
+                    <li>Por tanto:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds = \sqrt{dr^2 + r^2 \, d\phi^2}$$</li>
+                    <li>Si usamos $\phi$ como parámetro de la curva, entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$dr = \frac{dr}{d\phi} \, d\phi$$</li>
+                    <li>Definimos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r' = \frac{dr}{d\phi}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Elemento de arco simplificado -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">3. Elemento de arco en coordenadas polares - Parte II</h1>
+                <ul class="content-list">
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds = \sqrt{(r')^2 \, d\phi^2 + r^2 \, d\phi^2}$$</li>
+                    <li>Factorizamos $d\phi^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds = \sqrt{(r')^2 + r^2} \, d\phi$$</li>
+                    <li><strong>Ésta es la forma que usaremos en el funcional.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Funcional explícita -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">4. La funcional explícita</h1>
+                <ul class="content-list">
+                    <li>Sustituyendo en el Principio de Fermat $\delta \int n \, ds = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\int n(r) \sqrt{(r')^2 + r^2} \, d\phi$$</li>
+                    <li>Así, la funcional es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[r] = \int \Phi(r, r') \, d\phi$$</li>
+                    <li>con:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\Phi(r, r') = n(r) \sqrt{(r')^2 + r^2}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Por qué Beltrami -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">4. ¿Por qué usar Beltrami?</h1>
+                <ul class="content-list">
+                    <li>Observación importante: $\Phi(r, r')$ <strong>no depende explícitamente de $\phi$</strong>.</li>
+                    <li>Solo depende de $r$ y $r' = \dfrac{dr}{d\phi}$, no de $\phi$ directamente.</li>
+                    <li>Entonces <strong>no conviene usar Euler–Lagrange en su forma larga</strong> al tiro.</li>
+                    <li>Conviene usar la <strong>identidad de Beltrami</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed">$$\Phi - r' \frac{\partial \Phi}{\partial r'} = \text{constante}$$</span></li>
+                    <li><strong>Ésta es mucho más eficiente para este problema.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Derivada parcial de Phi -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">5. Cálculo de $\frac{\partial \Phi}{\partial r'}$</h1>
+                <ul class="content-list">
+                    <li>Tenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(r, r') = n(r) \sqrt{(r')^2 + r^2}$$</li>
+                    <li>Al derivar respecto de $r'$, $n(r)$ se comporta como constante (depende de $r$, no de $r'$):</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial r'} = n(r) \frac{\partial}{\partial r'} \sqrt{(r')^2 + r^2}$$</li>
+                    <li>Aplicamos regla de cadena:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \cdot \frac{1}{2\sqrt{(r')^2 + r^2}} \cdot 2r'$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \cdot \frac{r'}{\sqrt{(r')^2 + r^2}}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: Resultado parcial derivada -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">5. Derivada parcial de $\Phi$ - Resultado</h1>
+                <ul class="content-list">
+                    <li>Del cálculo anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{\partial \Phi}{\partial r'} = n(r) \frac{r'}{\sqrt{(r')^2 + r^2}}$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: Aplicación de Beltrami Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Aplicación de Beltrami - Parte I</h1>
+                <ul class="content-list">
+                    <li>Ahora calculamos $\Phi - r' \dfrac{\partial \Phi}{\partial r'}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi - r' \frac{\partial \Phi}{\partial r'} = n(r) \sqrt{(r')^2 + r^2} - r' \left[ n(r) \frac{r'}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                    <li>Sacamos factor común $n(r)$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \left[ \sqrt{(r')^2 + r^2} - \frac{(r')^2}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: Aplicación de Beltrami Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Aplicación de Beltrami - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) \left[ \sqrt{(r')^2 + r^2} - \frac{(r')^2}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                    <li>Llevamos a denominador común $\sqrt{(r')^2 + r^2}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \left[ \frac{(r')^2 + r^2}{\sqrt{(r')^2 + r^2}} - \frac{(r')^2}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \left[ \frac{(r')^2 + r^2 - (r')^2}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: Aplicación de Beltrami Parte III -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">6. Aplicación de Beltrami - Parte III (Simplificación)</h1>
+                <ul class="content-list">
+                    <li>Los términos $(r')^2$ se cancelan:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= n(r) \left[ \frac{r^2}{\sqrt{(r')^2 + r^2}} \right]$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$= \frac{n(r) \, r^2}{\sqrt{(r')^2 + r^2}}$$</li>
+                    <li style="margin-top: 20px;">La identidad de Beltrami dice que esta expresión es <strong>constante</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed">$$\frac{n(r) \, r^2}{\sqrt{(r')^2 + r^2}} = C$$</span></li>
+                    <li>donde $C$ es una constante arbitraria.</li>
+                    <li><strong>Ésta es ya una primera integral del problema.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: Despeje de r' Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Despeje de $r'$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>Partimos de:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{n(r) \, r^2}{\sqrt{(r')^2 + r^2}} = C$$</li>
+                    <li>Multiplicamos ambos lados por $\sqrt{(r')^2 + r^2}$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) \, r^2 = C \sqrt{(r')^2 + r^2}$$</li>
+                    <li>Elevamos al cuadrado ambos lados:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n^2(r) \, r^4 = C^2 \left[ (r')^2 + r^2 \right]$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: Despeje de r' Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Despeje de $r'$ - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n^2(r) \, r^4 = C^2 \left[ (r')^2 + r^2 \right]$$</li>
+                    <li>Expandimos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n^2(r) \, r^4 = C^2 (r')^2 + C^2 r^2$$</li>
+                    <li>Llevamos el último término al lado izquierdo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n^2(r) \, r^4 - C^2 r^2 = C^2 (r')^2$$</li>
+                    <li>Factorizamos $r^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r^2 \left[ n^2(r) \, r^2 - C^2 \right] = C^2 (r')^2$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: Despeje de r' Parte III -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">7. Despeje de $r'$ - Parte III (Resultado)</h1>
+                <ul class="content-list">
+                    <li>Dividimos por $C^2$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(r')^2 = r^2 \left[ \frac{n^2(r) \, r^2}{C^2} - 1 \right]$$</li>
+                    <li>Definimos una constante nueva $k$ por:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$k = \frac{1}{C^2}$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$(r')^2 = r^2 \left[ k \, n^2(r) \, r^2 - 1 \right]$$</li>
+                    <li>Tomando raíz cuadrada:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{dr}{d\phi} = r \sqrt{k \, n^2(r) \, r^2 - 1}$$</span></li>
+                    <li><strong>Ésta es exactamente la ecuación pedida.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: Significado de k -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">8. Qué significa la constante $k$</h1>
+                <ul class="content-list">
+                    <li>La constante $k$ es una <strong>constante de integración</strong> asociada a la simetría rotacional del problema.</li>
+                    <li>En óptica geométrica, esta constante está relacionada con la versión continua de la <strong>ley de Snell</strong> para un medio radial.</li>
+                    <li>De hecho, la cantidad:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) \, r \sin\alpha$$</li>
+                    <li>permanece constante a lo largo del rayo, donde $\alpha$ es el ángulo entre el rayo y la dirección radial.</li>
+                    <li>Pero para este ejercicio no hace falta introducirla; la primera integral de Beltrami basta.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 21: Segunda parte - n(r) proporcional r^m -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">9. Segunda Parte: El índice $n(r) \propto r^m$</h1>
+                <ul class="content-list">
+                    <li>Ahora el problema dice:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) \propto r^m$$</li>
+                    <li>Podemos escribir:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) = A \, r^m$$</li>
+                    <li>donde $A$ es una constante positiva.</li>
+                    <li>El problema pide hallar el valor de $m$ para que <strong>un rayo que parte inicialmente tangencial permanezca a distancia constante del centro</strong>.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22: Qué significa permanezca a distancia constante -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">10. Qué significa "permanezca a distancia constante"</h1>
+                <ul class="content-list">
+                    <li>Que el rayo <strong>permanezca a distancia constante</strong> del centro significa que describe una <strong>circunferencia de radio fijo</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r = r_0 = \text{constante}$$</li>
+                    <li>En particular:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{dr}{d\phi} = 0$$</li>
+                    <li style="margin-top: 20px;">Pero eso por sí solo solo dice que el radio no cambia en un instante.</li>
+                    <li><strong>Para que el rayo siga todo el tiempo a radio constante</strong>, la condición $r = r_0$ debe ser una <strong>solución completa</strong> de la ecuación extremal, no solo un punto de retorno.</li>
+                    <li>Entonces conviene volver a <strong>Euler–Lagrange</strong>, no quedarse solo con Beltrami.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: Ecuación de Euler-Lagrange -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">11. Ecuación de Euler–Lagrange para este problema</h1>
+                <ul class="content-list">
+                    <li>La ecuación de Euler–Lagrange general es:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{d\phi}\left( \frac{\partial \Phi}{\partial r'} \right) - \frac{\partial \Phi}{\partial r} = 0$$</li>
+                    <li>Para una solución circular donde $r = r_0 =$ constante:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r' = 0, \quad r'' = 0$$</li>
+                    <li>Si $r$ es constante, entonces $\dfrac{\partial \Phi}{\partial r'}$ evaluada en $r' = 0$ también es constante, así que:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{d}{d\phi}\left( \frac{\partial \Phi}{\partial r'} \right) = 0$$</li>
+                    <li>Entonces la ecuación de Euler–Lagrange se reduce a:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 15px;"><span class="boxed">$$\frac{\partial \Phi}{\partial r} = 0 \quad \text{cuando } r' = 0$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 24: Cálculo de parcial Phi respecto r Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">12. Cálculo de $\frac{\partial \Phi}{\partial r}$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>Tenemos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\Phi(r, r') = n(r) \sqrt{(r')^2 + r^2}$$</li>
+                    <li>Derivamos respecto de $r$ usando la <strong>regla del producto</strong>:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial r} = n'(r) \sqrt{(r')^2 + r^2} + n(r) \frac{\partial}{\partial r} \sqrt{(r')^2 + r^2}$$</li>
+                    <li>Ahora calculamos la segunda derivada:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial}{\partial r} \sqrt{(r')^2 + r^2} = \frac{1}{2\sqrt{(r')^2 + r^2}} \cdot 2r = \frac{r}{\sqrt{(r')^2 + r^2}}$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25: Cálculo de parcial Phi respecto r Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">12. Cálculo de $\frac{\partial \Phi}{\partial r}$ - Parte II</h1>
+                <ul class="content-list">
+                    <li>Sustituyendo:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial r} = n'(r) \sqrt{(r')^2 + r^2} + n(r) \frac{r}{\sqrt{(r')^2 + r^2}}$$</li>
+                    <li>Ahora imponemos la condición $r' = 0$. En ese caso:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\sqrt{(r')^2 + r^2} = \sqrt{0 + r^2} = r$$</li>
+                    <li>(asumiendo $r > 0$).</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{\partial \Phi}{\partial r}\bigg|_{r'=0} = n'(r) \cdot r + n(r) \cdot \frac{r}{r} = r \, n'(r) + n(r)$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26: Condición de órbita circular -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">12. Condición de órbita circular</h1>
+                <ul class="content-list">
+                    <li>La condición de órbita circular es que $\dfrac{\partial \Phi}{\partial r} = 0$ cuando $r' = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \, n'(r) + n(r) = 0$$</li>
+                    <li>Dividimos por $n(r)$ (asumiendo $n(r) \neq 0$):</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \frac{n'(r)}{n(r)} + 1 = 0$$</li>
+                    <li>Es decir:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \frac{n'(r)}{n(r)} = -1$$</li>
+                    <li style="margin-top: 20px;"><strong>Ésta es la condición que debe cumplir $n(r)$ para que exista una órbita circular.</strong></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: Sustitución n(r) = A r^m Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">13. Sustitución $n(r) = A \, r^m$ - Parte I</h1>
+                <ul class="content-list">
+                    <li>Ahora usamos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) = A \, r^m$$</li>
+                    <li>Calculamos la derivada:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n'(r) = A \, m \, r^{m-1}$$</li>
+                    <li>Sustituyendo en la condición $r \, n'(r) + n(r) = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \cdot A \, m \, r^{m-1} + A \, r^m = 0$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 28: Sustitución n(r) = A r^m Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">13. Sustitución $n(r) = A \, r^m$ - Parte II</h1>
+                <ul class="content-list">
+                    <li>De la expresión anterior:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \cdot A \, m \, r^{m-1} + A \, r^m = 0$$</li>
+                    <li>Simplificamos:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$A \, m \, r^m + A \, r^m = 0$$</li>
+                    <li>Factorizamos $A \, r^m$:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$A \, r^m (m + 1) = 0$$</li>
+                    <li>Como $A \neq 0$ y queremos que esto valga para cualquier $r > 0$ (cualquier radio), debe cumplirse:</li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$m + 1 = 0$$</span></li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 29: Resultado final -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">14. Resultado Final</h1>
+                <ul class="content-list">
+                    <li>De $m + 1 = 0$:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed" style="font-size: 1.4rem;">$$m = -1$$</span></li>
+                    <li>Por tanto, la condición para que un rayo inicialmente tangencial permanezca a distancia constante del centro para <strong>cualquier</strong> radio es:</li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed">$$n(r) \propto \frac{1}{r}$$</span></li>
+                    <li>O, escrito explícitamente:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$n(r) = \frac{A}{r}$$</li>
+                    <li>donde $A$ es una constante positiva.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 30: Resumen Parte I -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">15. Resumen Completo - Parte I</h1>
+                <ul class="content-list">
+                    <li><strong>Principio de Fermat en forma integral:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\delta \int n \, ds = 0$$</span></li>
+                    <li style="margin-top: 20px;"><strong>En coordenadas polares planas:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$ds = \sqrt{\left(\frac{dr}{d\phi}\right)^2 + r^2} \, d\phi$$</li>
+                    <li>Entonces:</li>
+                    <li style="text-align: center; margin-left: -50px;">$$I[r] = \int n(r) \sqrt{(r')^2 + r^2} \, d\phi$$</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 31: Resumen Parte II -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">15. Resumen Completo - Parte II</h1>
+                <ul class="content-list">
+                    <li><strong>Usando Beltrami (simetría: $\Phi$ no depende de $\phi$):</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$\frac{n(r) \, r^2}{\sqrt{(r')^2 + r^2}} = C$$</li>
+                    <li style="margin-top: 20px;"><strong>Ecuación del rayo en forma diferencial:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;"><span class="boxed">$$\frac{dr}{d\phi} = r \sqrt{k \, n^2(r) \, r^2 - 1}$$</span></li>
+                    <li>donde $k = 1/C^2$ es una constante de integración relacionada con la ley de Snell generalizada.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 32: Resumen Parte III -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">15. Resumen Completo - Parte III</h1>
+                <ul class="content-list">
+                    <li><strong>Condición para órbita circular (usando Euler–Lagrange):</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \, n'(r) + n(r) = 0$$</li>
+                    <li style="margin-top: 20px;"><strong>Si $n(r) = A \, r^m$:</strong></li>
+                    <li style="text-align: center; margin-left: -50px;">$$r \cdot A \, m \, r^{m-1} + A \, r^m = 0$$</li>
+                    <li style="text-align: center; margin-left: -50px;">$$A \, r^m (m + 1) = 0$$</li>
+                    <li style="margin-top: 20px;"><strong>Resultado final:</strong></li>
+                    <li style="text-align: center; margin-left: -50px; margin-top: 20px; margin-bottom: 20px;"><span class="boxed" style="font-size: 1.3rem;">$$m = -1$$</span></li>
+                    <li>Es decir, $n(r) \propto \dfrac{1}{r}$.</li>
+                </ul>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 33: Ejercicios de Aplicación -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1 class="slide-title">Ejercicios de Aplicación - Tarea 5</h1>
+                <div style="text-align: left; max-width: 950px; margin: 0 auto;">
+                    <p class="content-text" style="font-size: 1.3rem; margin-bottom: 30px;">
+                        Problemas completados de cálculo variacional:
+                    </p>
+                    <ul class="content-list" style="font-size: 1.2rem; line-height: 2.3;">
+                        <li><strong style="color: #2ecc71;">✓ Problema 1:</strong> Geodésicas en superficies (teoría general)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 3:</strong> La Braquistócrona (tiempo mínimo)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 2:</strong> Geodésicas Esféricas (círculos máximos)</li>
+                        <li><strong style="color: #2ecc71;">✓ Problema 5:</strong> Fermat con índice radial (esta presentación)</li>
+                    </ul>
+                    <p class="content-text" style="margin-top: 40px;">Navegación rápida:</p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="../ayudantia1-variacional-euler-lagrange/index.html" style="display: inline-block; padding: 12px 25px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">← Ayudantía 1</a>
+                        <a href="../braquistocrona/index.html" style="display: inline-block; padding: 12px 25px; background: #e0a456; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">↔ Braquistócrona</a>
+                        <a href="../geodesicas-esfera/index.html" style="display: inline-block; padding: 12px 25px; background: #e0e0e0; color: #2c2c2c; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 10px;">Geodésicas →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-marker"></div>
+            <div class="footer">
+                <div class="footer-left"><strong>Joaquín Saldaño</strong></div>
+                <div class="footer-center">Mecánica Intermedia 2026</div>
+                <div class="footer-right">Universidad de Valparaíso</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">34</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prev-btn">←</button>
+        <button class="nav-button" id="next-btn">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.getElementById('next-btn').addEventListener('click', nextSlide);
+        document.getElementById('prev-btn').addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        showSlide(0);
+
+        // KaTeX auto-render
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>
