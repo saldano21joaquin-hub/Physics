@@ -6,8 +6,9 @@
 <title>Principio Variacional desde cero</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-  onload="initPresentation()"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="../assets/presentation-core.css">
+<script defer src="../assets/presentation-core.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 
@@ -743,73 +744,5 @@ body{
   </div>
 </div>
 <div class="progress-bar" id="pb"></div>
-
-<script>
-const slides = Array.from(document.querySelectorAll('.slide'));
-let cur = 0;
-
-function getFragments(sl) {
-  const frags = Array.from(sl.querySelectorAll('.fragment'));
-  frags.sort((a, b) => {
-    const ia = a.dataset.fragmentIndex !== undefined ? parseInt(a.dataset.fragmentIndex) : 9999;
-    const ib = b.dataset.fragmentIndex !== undefined ? parseInt(b.dataset.fragmentIndex) : 9999;
-    return ia - ib;
-  });
-  return frags;
-}
-
-function updateUI() {
-  slides.forEach((s, i) => {
-    s.classList.remove('past', 'present', 'future');
-    if (i < cur) s.classList.add('past');
-    else if (i === cur) s.classList.add('present');
-    else s.classList.add('future');
-  });
-  document.getElementById('cur').textContent = cur + 1;
-  const pct = cur === 0 ? 0 : (cur / (slides.length - 1)) * 100;
-  document.getElementById('pb').style.width = pct + '%';
-}
-
-function next() {
-  const sl = slides[cur];
-  const frags = getFragments(sl);
-  const nxt = frags.find(f => !f.classList.contains('visible'));
-  if (nxt) {
-    nxt.classList.add('visible');
-  } else if (cur < slides.length - 1) {
-    cur++;
-    updateUI();
-  }
-}
-
-function prev() {
-  const sl = slides[cur];
-  const frags = getFragments(sl);
-  const vis = frags.filter(f => f.classList.contains('visible'));
-  if (vis.length > 0) {
-    vis[vis.length - 1].classList.remove('visible');
-  } else if (cur > 0) {
-    cur--;
-    updateUI();
-    getFragments(slides[cur]).forEach(f => f.classList.add('visible'));
-  }
-}
-
-document.addEventListener('keydown', e => {
-  if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
-  if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); prev(); }
-});
-
-function initPresentation() {
-  renderMathInElement(document.body, {
-    delimiters: [
-      { left: '$$', right: '$$', display: true },
-      { left: '$',  right: '$',  display: false }
-    ],
-    throwOnError: false
-  });
-  updateUI();
-}
-</script>
 </body>
 </html>
