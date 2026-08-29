@@ -1,40 +1,42 @@
-# Compilados y binarios
+.DS_Store
+.vscode/
+.idea/
+
+# Python and notebooks
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.env
+.env.*
+
+# C, C++ and CUDA
 *.o
 *.a
 *.so
 *.dylib
 *.exe
-*_test
-test_openmp
-test_openmp_cpp
-ising
-ising.exe
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-*.swp
-
-# Archivos temporales
-*.tmp
-*.temp
-
-# Output
 *.out
+*.ptx
+*.cubin
+
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
 *.log
+*.out
+*.synctex.gz
+*.toc
 
-# CMake
-CMakeFiles/
-cmake_install.cmake
-CMakeCache.txt
-Makefile
-*.cmake
+# Mathematica
+*.mx
+*.ma
+*.mb
 
+# Generated data and results
+data/
+outputs/
